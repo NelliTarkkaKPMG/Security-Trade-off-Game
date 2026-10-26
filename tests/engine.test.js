@@ -210,3 +210,22 @@ test("a reasonable build produces a spread of outcomes, not just extremes", () =
   }
   for (const g of ["minor", "moderate", "major"]) assert.ok((counts[g] || 0) > 5000 * 0.03, `${g}: ${counts[g]}`);
 });
+
+test("lost laptop: encryption protects the disk, MFA protects cloud logins", () => {
+  const laptop = data.scenarios.find((s) => s.id === "laptop");
+  const opts = { tier: tier("basic") };
+  const breach = (sel) => engine.expectedLoss(laptop, sel, data, opts).breachProbability;
+  // The lost device itself is not an attacker stage that can be "passed".
+  assert.ok(laptop.stages.every((st) => Object.keys(st.prevent).length > 0));
+  assert.ok(breach(["encryption"]) < 0.05);
+  assert.ok(breach(["mfa"]) < 0.1);
+  assert.ok(breach(["encryption", "mfa"]) < breach(["encryption"]));
+  // Most finders never try to read the data at all.
+  assert.ok(breach([]) <= 0.25);
+});
+
+test("scenario-level give-up chance applies and uses the scenario's story", () => {
+  const laptop = data.scenarios.find((s) => s.id === "laptop");
+  const r = engine.runAttack(laptop, [], data, { tier: tier("basic"), rng: () => 0.3 });
+  assert.ok(r.gaveUp);
+});

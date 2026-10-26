@@ -193,7 +193,7 @@
       const outcome = st.blocked
         ? "🛑 Hyökkäys pysäytettiin!"
         : st.gaveUp
-          ? "🏳️ Hyökkääjä epäonnistui omin avuin ja luovutti."
+          ? "🏳️ " + (r.scenario.giveUpText || "Hyökkääjä epäonnistui omin avuin ja luovutti.")
           : contained
             ? "↘️ Hyökkääjä pääsi läpi, mutta kontrollit rajasivat sen ulottuvuutta −" + pct(st.contained) + "."
             : "➡️ Hyökkääjä pääsi läpi esteettä.";
@@ -273,8 +273,10 @@
 
     let summary;
     if (r.gaveUp) {
-      summary = "Hyökkääjä epäonnistui omin avuin vaiheessa " + (r.blockedAt + 1) + "/" + r.scenario.stages.length +
-        ". Tällä kertaa kävi tuuri – katso riskiprofiilista, kestäisikö kokoonpanosi seuraavan yrityksen.";
+      summary =
+        (r.scenario.giveUpText ||
+          "Hyökkääjä epäonnistui omin avuin vaiheessa " + (r.blockedAt + 1) + "/" + r.scenario.stages.length + ".") +
+        " Tällä kertaa kävi tuuri – katso riskiprofiilista, kestäisikö kokoonpanosi seuraavan yrityksen.";
     } else if (!r.breached && r.blockedAt === 0) {
       summary = "Hyökkäys pysäytettiin jo ensimmäisessä vaiheessa. Erinomaista!";
     } else if (!r.breached) {

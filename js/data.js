@@ -5,6 +5,9 @@
  * yksinään pysäyttää hyökkäyksen kyseisessä vaiheessa. Useampi kontrolli
  * samassa vaiheessa yhdistetään: P(torjunta) = 1 - Π(1 - tehokkuus).
  *
+ * Skenaarion valinnainen giveUp nostaa hyökkääjän luovuttamisen todennäköisyyttä
+ * (vähintään tämä per vaihe) ja giveUpText kertoo, miltä se näyttää tarinassa.
+ *
  * Skenaarion likelihood on suhteellinen yleisyys ja tiers ne hyökkääjätasot,
  * joille skenaario on tyypillinen. Organisaation tierWeights kertoo, kuinka
  * todennäköisesti sitä vastaan hyökkää kunkin tason hyökkääjä.
@@ -443,22 +446,20 @@
       name: "Kadonnut kannettava",
       icon: "💻",
       impact: 120,
-      intro: "Myyntipäällikön kannettava jää junaan – ja päätyy vääriin käsiin.",
+      intro: "Myyntipäällikön kannettava jää junaan. Laite on lukittu, mutta löytäjä yrittää silti päästä käsiksi sen tietoihin.",
+      // Useimmiten löytäjä ei ole kiinnostunut tiedoista, vaan laite pyyhitään ja myydään.
+      giveUp: 0.5,
+      giveUpText: "Löytäjä ei ollut kiinnostunut tiedoista – laite pyyhittiin ja myytiin eteenpäin.",
       stages: [
         {
-          name: "Laite katoaa",
-          text: "Kiireinen päivä, laukku jää istuimelle.",
-          prevent: { training: 0.15 }
-        },
-        {
-          name: "Levyn lukeminen",
-          text: "Löytäjä irrottaa levyn ja yrittää lukea sen toisella koneella.",
+          name: "Lukituksen ohittaminen",
+          text: "Kirjautumissalasana ei suojaa levyä: löytäjä irrottaa levyn tai käynnistää koneen USB-tikulta ja lukee tiedostot suoraan.",
           prevent: { encryption: 0.9 }
         },
         {
-          name: "Tallennettujen tunnusten käyttö",
-          text: "Selaimeen tallennetuilla tunnuksilla kirjaudutaan pilvipalveluihin.",
-          prevent: { mfa: 0.6, pam: 0.2 }
+          name: "Kirjautuminen pilvipalveluihin",
+          text: "Levyltä löytyy selaimeen tallennettuja salasanoja, joilla yritetään kirjautua yrityksen sähköpostiin ja pilvipalveluihin.",
+          prevent: { mfa: 0.8, pam: 0.2 }
         }
       ],
       detect: { siem: 0.2 },

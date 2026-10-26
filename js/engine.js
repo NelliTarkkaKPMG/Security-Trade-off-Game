@@ -83,6 +83,11 @@
     return { p: 1 - miss, contributors };
   }
 
+  // Hyökkääjän luovuttamisen todennäköisyys per vaihe: tason ja skenaarion suurempi.
+  function giveUpChance(scenario, tier) {
+    return Math.max(tier.giveUp, scenario.giveUp || 0);
+  }
+
   function recoveryFactor(scenario, selected) {
     const set = toSet(selected);
     let factor = 1;
@@ -168,13 +173,14 @@
     const impact = scenario.impact * impactScale * tier.impactScale;
     const { set, friction, multiplier } = context(selected, data);
 
+    const giveUp = giveUpChance(scenario, tier);
     const stages = [];
     let blockedAt = -1;
     let scope = 1; // kuinka laajalle hyökkäys pääsi (1 = koko ympäristö)
     for (let i = 0; i < scenario.stages.length; i++) {
       const stage = scenario.stages[i];
       const { p, contributors } = combine(stage.prevent, set, multiplier, tier.strength);
-      const pStop = 1 - (1 - p) * (1 - tier.giveUp);
+      const pStop = 1 - (1 - p) * (1 - giveUp);
       const roll = rng();
       const blocked = roll < p; // puolustus pysäytti
       const gaveUp = !blocked && roll < pStop; // hyökkääjä epäonnistui itse
@@ -238,12 +244,13 @@
     const impact = scenario.impact * impactScale * tier.impactScale;
     const { set, multiplier } = context(selected, data);
 
+    const giveUp = giveUpChance(scenario, tier);
     let reach = 1; // todennäköisyys, että hyökkäys pääsee nykyiseen vaiheeseen
     let scope = 1;
     let loss = 0;
     scenario.stages.forEach((stage, i) => {
       const { p } = combine(stage.prevent, set, multiplier, tier.strength);
-      const pStop = 1 - (1 - p) * (1 - tier.giveUp);
+      const pStop = 1 - (1 - p) * (1 - giveUp);
       loss += reach * pStop * impact * SEVERITY_MEAN * STAGE_DAMAGE * i;
       reach *= 1 - pStop;
       scope *= 1 - CONTAINMENT * p;

@@ -1,0 +1,11 @@
+{
+  "name": "security-trade-off-game",
+  "version": "1.0.0",
+  "description": "Build the Most Secure System – interaktiivinen tietoturvan kompromissipeli",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "npx --yes serve -l 8080 ."
+  },
+  "license": "MIT"
+}

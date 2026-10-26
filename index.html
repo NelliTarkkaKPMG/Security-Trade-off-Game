@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security Trade-off Game</title>
+  <meta name="description" content="Rakenna mahdollisimman turvallinen järjestelmä rajallisella budjetilla – ja katso, miten valintasi kestävät satunnaisen hyökkäyksen.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">🛡️</span>
+      <div>
+        <h1>Build the Most Secure System</h1>
+        <p class="tagline">Tietoturva, riskit ja resurssit tasapainossa</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Aloitus -->
+    <section id="screen-intro" class="screen" aria-labelledby="intro-title">
+      <div class="panel intro">
+        <h2 id="intro-title">Olet yrityksen uusi tietoturvajohtaja</h2>
+        <p>Hallitus on myöntänyt sinulle budjetin tietoturvaan. Valitse kontrollit, joilla suojaat yrityksen järjestelmät – <strong>kaikkea et voi saada</strong>.</p>
+        <ul class="rules">
+          <li><span aria-hidden="true">💶</span> Jokainen kontrolli maksaa. Budjetti ei riitä kaikkeen.</li>
+          <li><span aria-hidden="true">😤</span> Osa kontrolleista hankaloittaa työntekoa. Liika <strong>käyttäjäkitka</strong> saa käyttäjät kiertämään suojauksia, ja niiden teho heikkenee.</li>
+          <li><span aria-hidden="true">🎲</span> Lopuksi järjestelmää vastaan hyökätään <strong>satunnaisella uhkaskenaariolla</strong>. Et tiedä etukäteen, mikä se on.</li>
+          <li><span aria-hidden="true">📊</span> Näet, miten valintasi pärjäsivät – ja mitä olisi kannattanut tehdä toisin.</li>
+        </ul>
+        <h3>Valitse organisaatio</h3>
+        <div id="difficulty-list" class="difficulty-list"></div>
+      </div>
+    </section>
+
+    <!-- Kontrollien valinta -->
+    <section id="screen-build" class="screen" hidden aria-labelledby="build-title">
+      <div class="status-bar panel" aria-live="polite">
+        <div class="status-item">
+          <div class="status-label">Budjetti <span id="org-name" class="muted"></span></div>
+          <div class="meter"><div id="budget-fill" class="meter-fill"></div></div>
+          <div class="status-value"><span id="budget-left"></span> jäljellä <span class="muted">/ <span id="budget-total"></span></span></div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Käyttäjäkitka</div>
+          <div class="meter"><div id="friction-fill" class="meter-fill friction"></div></div>
+          <div class="status-value"><span id="friction-value"></span> <span id="friction-note" class="muted"></span></div>
+        </div>
+        <div class="status-actions">
+          <button id="btn-attack" class="btn btn-danger" type="button">⚔️ Käynnistä hyökkäys</button>
+        </div>
+      </div>
+
+      <h2 id="build-title" class="section-title">Valitse tietoturvakontrollit</h2>
+      <p class="muted section-sub">Klikkaa korttia valitaksesi sen. Harmaana näkyviin kontrolleihin budjetti ei enää riitä.</p>
+      <div id="control-grid" class="control-grid"></div>
+    </section>
+
+    <!-- Hyökkäys -->
+    <section id="screen-attack" class="screen" hidden aria-labelledby="attack-title">
+      <div class="panel attack">
+        <div class="attack-head">
+          <span id="attack-icon" class="attack-icon" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">Uhkaskenaario</p>
+            <h2 id="attack-title"></h2>
+            <p id="attack-intro" class="muted"></p>
+          </div>
+        </div>
+        <ol id="attack-timeline" class="timeline"></ol>
+        <div class="attack-actions">
+          <button id="btn-skip" class="btn btn-ghost" type="button">Ohita animaatio</button>
+          <button id="btn-results" class="btn btn-primary" type="button" hidden>Näytä tulokset →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tulokset -->
+    <section id="screen-result" class="screen" hidden aria-labelledby="result-title">
+      <div class="panel result-hero" id="result-hero">
+        <div class="result-emoji" id="result-emoji" aria-hidden="true"></div>
+        <div>
+          <p class="eyebrow" id="result-scenario"></p>
+          <h2 id="result-title"></h2>
+          <p id="result-summary"></p>
+        </div>
+        <div class="score">
+          <div class="score-value" id="result-score"></div>
+          <div class="score-label">pistettä / 100</div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="panel">
+          <h3>💸 Vahingot</h3>
+          <div class="damage-bar"><div id="damage-fill" class="damage-fill"></div></div>
+          <p><strong id="damage-value"></strong> <span class="muted">/ pahimmillaan <span id="damage-max"></span></span></p>
+          <ul id="damage-breakdown" class="plain-list"></ul>
+        </div>
+
+        <div class="panel">
+          <h3>💡 Mitä olisi kannattanut tehdä toisin?</h3>
+          <ul id="lessons" class="plain-list"></ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>📊 Kokoonpanosi riskiprofiili kaikkia uhkia vastaan</h3>
+        <p class="muted">Odotettu vahinko kussakin skenaariossa valitsemillasi kontrolleilla. Yksi hyökkäys on aina osittain tuuria – riskiprofiili kertoo, kuinka hyvin kokoonpano kestää <em>keskimäärin</em>.</p>
+        <div class="resilience">
+          <span>Kokonaiskestävyys</span>
+          <strong id="resilience-value"></strong>
+        </div>
+        <div id="risk-profile" class="risk-profile"></div>
+      </div>
+
+      <div class="panel">
+        <h3>🧰 Valitsemasi kontrollit</h3>
+        <div id="chosen-list" class="chip-list"></div>
+      </div>
+
+      <div class="result-actions">
+        <button id="btn-again" class="btn btn-danger" type="button">🎲 Uusi hyökkäys samalla kokoonpanolla</button>
+        <button id="btn-edit" class="btn btn-primary" type="button">✏️ Muokkaa valintoja</button>
+        <button id="btn-restart" class="btn btn-ghost" type="button">↺ Aloita alusta</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer muted">
+    Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

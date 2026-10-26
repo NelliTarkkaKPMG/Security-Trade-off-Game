@@ -320,7 +320,6 @@
       );
     }
 
-    renderReviewer(r, budget);
     renderLessons(r, budget);
     renderRiskProfile();
 
@@ -359,50 +358,6 @@
     marker.title = pct(r.ratio) + " pahimmasta mahdollisesta";
     track.append(marker);
     scale.append(track);
-  }
-
-  function renderReviewer(r, budget) {
-    const rev = window.GameReviewer;
-    const panel = $("reviewer");
-    if (!rev) {
-      panel.hidden = true;
-      return;
-    }
-    panel.hidden = false;
-
-    const img = $("reviewer-img");
-    const fallback = $("reviewer-fallback");
-    fallback.textContent = rev.fallback;
-    img.alt = rev.name;
-    img.onload = () => {
-      img.hidden = false;
-      fallback.hidden = true;
-    };
-    img.onerror = () => {
-      img.hidden = true;
-      fallback.hidden = false;
-    };
-    if (img.getAttribute("src") !== rev.image) img.src = rev.image;
-
-    const group = ["blocked", "minor"].includes(r.grade.id) ? "good" : r.grade.id === "moderate" ? "mid" : "bad";
-    let quote = r.grade.id === "lucky" ? rev.lucky : rev.lines[r.scenario.id][group];
-    if (group !== "good" && r.grade.id !== "lucky") {
-      const best = engine.bestAdditions(
-        r.scenario,
-        state.selected,
-        data,
-        { impactScale: state.difficulty.impactScale, tier: r.tier },
-        budget
-      )[0];
-      if (best) quote += " " + rev.tip.replace("{control}", best.control.short);
-    }
-
-    const stars = { blocked: 5, minor: 4, lucky: 4, moderate: 3, major: 2, critical: 1 }[r.grade.id];
-    $("reviewer-title").textContent = rev.title;
-    $("reviewer-stars").textContent = "★".repeat(stars) + "☆".repeat(5 - stars);
-    $("reviewer-stars").setAttribute("aria-label", stars + " / 5 tähteä");
-    $("reviewer-quote").textContent = "“" + quote + "”";
-    $("reviewer-disclaimer").textContent = rev.disclaimer;
   }
 
   function renderLessons(r, budget) {

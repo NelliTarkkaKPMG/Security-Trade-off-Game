@@ -48,12 +48,6 @@ Typical outcomes (share of attacks that lead to a breach):
 
 The numbers are simplified, teaching-level estimates. They are not real risk measurements.
 
-## Reviewer
-
-The results screen shows a parody "Sydney Sweeney arvioi" review: star ratings and a line for every scenario and outcome level, plus a tip on the control that would have helped most. The lines are in `js/reviewer.js`.
-
-The reviewer image is not stored in the repo for copyright reasons. Add it locally as `assets/reviewer/sydney.png`. Without it, the game shows an emoji instead.
-
 ## Running it
 
 No build step and no dependencies. Open `index.html` in a browser, or serve the folder as a static site (for example with GitHub Pages):

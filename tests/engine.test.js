@@ -269,11 +269,3 @@ test("controls only appear where they can actually help", () => {
     assert.ok(!("backup" in data.scenarios.find((s) => s.id === id).recover), id);
   }
 });
-
-test("reviewer has a line for every scenario and outcome group", () => {
-  const reviewer = require("../js/reviewer.js");
-  for (const s of data.scenarios) {
-    for (const g of ["good", "mid", "bad"]) assert.ok(reviewer.lines[s.id] && reviewer.lines[s.id][g], `${s.id} ${g}`);
-  }
-  assert.ok(reviewer.lucky && reviewer.tip.includes("{control}"));
-});

@@ -103,7 +103,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .intro h2 { font-size: 1.6rem; }
 .rules { list-style: none; padding: 0; margin: 16px 0 24px; display: grid; gap: 10px; }
 .rules li { display: flex; gap: 10px; align-items: flex-start; }
-.rules li span { font-size: 1.2rem; }
+.rule-icon { font-size: 1.2rem; }
 
 .difficulty-list {
   display: grid;
@@ -253,6 +253,8 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .timeline-item.passed .timeline-dot { border-color: var(--danger); background: var(--danger); }
 .timeline-item.blocked .timeline-dot { border-color: var(--ok); background: var(--ok); }
 .timeline-item.skipped { color: var(--muted); }
+.timeline-item.gaveup .timeline-dot { border-color: var(--muted); background: var(--muted); }
+.timeline-item.gaveup .timeline-body { border-left-color: var(--muted); }
 .timeline-body {
   flex: 1;
   background: var(--panel-2);
@@ -280,10 +282,10 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 }
 .result-emoji { font-size: 3.5rem; }
 .result-hero h2 { font-size: 1.8rem; }
-.grade-blocked, .grade-minor { border-color: var(--ok); }
+.grade-blocked, .grade-minor, .grade-lucky { border-color: var(--ok); }
 .grade-major { border-color: var(--warn); }
 .grade-critical { border-color: var(--danger); }
-.grade-blocked h2, .grade-minor h2 { color: var(--ok); }
+.grade-blocked h2, .grade-minor h2, .grade-lucky h2 { color: var(--ok); }
 .grade-major h2 { color: var(--warn); }
 .grade-critical h2 { color: var(--danger); }
 
@@ -302,8 +304,33 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .hint { color: var(--muted); }
 .hint.ok { color: var(--ok); }
 
-.resilience { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 0; }
-.resilience strong { font-size: 1.6rem; color: var(--accent); }
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0 16px; }
+.stat { background: var(--panel-2); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; }
+.stat span { font-size: 0.8rem; color: var(--muted); }
+.stat strong { font-size: 1.4rem; color: var(--accent); }
+.stat strong.muted { color: var(--muted); }
+.risk-prob { display: block; font-size: 0.75rem; color: var(--muted); }
+
+/* Hyökkääjätasot */
+.tier-basic { --tier: var(--ok); }
+.tier-advanced { --tier: var(--warn); }
+.tier-apt { --tier: var(--danger); }
+.tier-mix { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.78rem; }
+.tier-mix-label { color: var(--muted); font-weight: 600; }
+.tier-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--panel); }
+.tier-seg { background: var(--tier); }
+.tier-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); }
+.tier-key::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tier); margin-right: 4px; }
+.tier-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--tier, var(--border));
+  color: var(--tier, var(--text));
+}
+.small { font-size: 0.85rem; }
 
 .risk-profile { display: grid; gap: 8px; }
 .risk-row {
@@ -336,6 +363,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .result-grid { grid-template-columns: 1fr; gap: 0; }
   .risk-row { grid-template-columns: 1fr; gap: 4px; }
   .risk-value { text-align: left; }
+  .stat-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

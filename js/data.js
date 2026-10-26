@@ -4,6 +4,10 @@
  * Kontrollin tehokkuus (0–1) kertoo, millä todennäköisyydellä kontrolli
  * yksinään pysäyttää hyökkäyksen kyseisessä vaiheessa. Useampi kontrolli
  * samassa vaiheessa yhdistetään: P(torjunta) = 1 - Π(1 - tehokkuus).
+ *
+ * Skenaarion likelihood on suhteellinen yleisyys ja tiers ne hyökkääjätasot,
+ * joille skenaario on tyypillinen. Organisaation tierWeights kertoo, kuinka
+ * todennäköisesti sitä vastaan hyökkää kunkin tason hyökkääjä.
  */
 (function (root) {
   const controls = [
@@ -176,6 +180,7 @@
       icon: "🚀",
       budget: 60,
       impactScale: 0.5,
+      tierWeights: { basic: 0.75, advanced: 0.22, apt: 0.03 },
       desc: "Pieni tiimi, pieni budjetti. Jokainen euro on tarkkaan mietittävä."
     },
     {
@@ -184,6 +189,7 @@
       icon: "🏢",
       budget: 100,
       impactScale: 1,
+      tierWeights: { basic: 0.55, advanced: 0.37, apt: 0.08 },
       desc: "Vakiintunut yritys, jolla on jo paljon suojattavaa."
     },
     {
@@ -192,7 +198,46 @@
       icon: "🏦",
       budget: 150,
       impactScale: 2,
+      tierWeights: { basic: 0.35, advanced: 0.45, apt: 0.2 },
       desc: "Isompi budjetti – mutta myös isommat menetykset, jos jotain sattuu."
+    }
+  ];
+
+  /*
+   * Hyökkääjien taitotasot.
+   *  strength:    kontrollin tehokkuus e muuttuu muotoon 1 - (1 - e)^(1 / strength).
+   *               Alle 1 = kontrollit tehoavat paremmin, yli 1 = huonommin.
+   *  giveUp:      todennäköisyys, että hyökkääjä epäonnistuu tai luovuttaa
+   *               itsestään kussakin vaiheessa.
+   *  impactScale: kuinka suuren vahingon onnistunut hyökkäys tekee.
+   */
+  const attackerTiers = [
+    {
+      id: "basic",
+      name: "Perustaso",
+      icon: "🧢",
+      strength: 0.6,
+      giveUp: 0.2,
+      impactScale: 0.5,
+      desc: "Automatisoituja, opportunistisia hyökkäyksiä valmiilla työkaluilla. Siirtyy helpommaan kohteeseen, jos vastaan tulee esteitä."
+    },
+    {
+      id: "advanced",
+      name: "Edistynyt",
+      icon: "🎯",
+      strength: 1,
+      giveUp: 0.08,
+      impactScale: 1,
+      desc: "Ammattimainen rikollisryhmä, joka valitsee kohteensa ja on valmis näkemään vaivaa."
+    },
+    {
+      id: "apt",
+      name: "Huipputaso (APT)",
+      icon: "🕶️",
+      strength: 1.7,
+      giveUp: 0.02,
+      impactScale: 1.6,
+      desc: "Valtiollinen tai vastaava toimija, jolla on aikaa, rahaa ja omia haavoittuvuuksia. Harvinainen – mutta lähes pysäyttämätön."
     }
   ];
 
@@ -202,6 +247,8 @@
   const scenarios = [
     {
       id: "ransomware",
+      likelihood: 3,
+      tiers: ["basic", "advanced", "apt"],
       name: "Kiristyshaittaohjelma",
       icon: "💀",
       impact: 400,
@@ -233,6 +280,8 @@
     },
     {
       id: "bec",
+      likelihood: 3,
+      tiers: ["basic", "advanced"],
       name: "Toimitusjohtajahuijaus",
       icon: "🎭",
       impact: 250,
@@ -259,6 +308,8 @@
     },
     {
       id: "stuffing",
+      likelihood: 3,
+      tiers: ["basic", "advanced"],
       name: "Tunnusten täyttöhyökkäys",
       icon: "🤖",
       impact: 200,
@@ -280,6 +331,8 @@
     },
     {
       id: "webapp",
+      likelihood: 2,
+      tiers: ["basic", "advanced", "apt"],
       name: "SQL-injektio verkkokaupassa",
       icon: "🕸️",
       impact: 300,
@@ -306,6 +359,8 @@
     },
     {
       id: "ddos",
+      likelihood: 1.5,
+      tiers: ["basic", "advanced"],
       name: "Palvelunestohyökkäys",
       icon: "🌪️",
       impact: 150,
@@ -327,6 +382,8 @@
     },
     {
       id: "insider",
+      likelihood: 1,
+      tiers: ["basic", "advanced", "apt"],
       name: "Sisäpiirin uhka",
       icon: "🕴️",
       impact: 280,
@@ -353,6 +410,8 @@
     },
     {
       id: "supplychain",
+      likelihood: 0.5,
+      tiers: ["advanced", "apt"],
       name: "Toimitusketjuhyökkäys",
       icon: "📦",
       impact: 450,
@@ -379,6 +438,8 @@
     },
     {
       id: "laptop",
+      likelihood: 2,
+      tiers: ["basic"],
       name: "Kadonnut kannettava",
       icon: "💻",
       impact: 120,
@@ -405,6 +466,8 @@
     },
     {
       id: "vpn",
+      likelihood: 2,
+      tiers: ["basic", "advanced", "apt"],
       name: "Paikkaamaton VPN-laite",
       icon: "🚪",
       impact: 350,
@@ -431,7 +494,7 @@
     }
   ];
 
-  const data = { controls, difficulties, scenarios, frictionLimit };
+  const data = { controls, difficulties, attackerTiers, scenarios, frictionLimit };
 
   if (typeof module === "object" && module.exports) {
     module.exports = data;

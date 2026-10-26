@@ -3,11 +3,11 @@
   const data = window.GameData;
   const engine = window.GameEngine;
   const controlMap = Object.fromEntries(data.controls.map((c) => [c.id, c]));
+  const tierMap = Object.fromEntries(data.attackerTiers.map((t) => [t.id, t]));
 
   const state = {
     difficulty: null,
     selected: new Set(),
-    lastScenarioId: null,
     result: null
   };
 
@@ -45,17 +45,32 @@
         el("span", "difficulty-icon", d.icon),
         el("strong", null, d.name),
         el("span", "difficulty-budget", "Budjetti " + money(d.budget)),
-        el("span", "muted", d.desc)
+        el("span", "muted", d.desc),
+        tierMix(d)
       );
       btn.addEventListener("click", () => startGame(d));
       list.append(btn);
     }
   }
 
+  // Pieni pinottu palkki: millaiset hyökkääjät organisaatiota tyypillisesti uhkaavat.
+  function tierMix(difficulty) {
+    const wrap = el("span", "tier-mix");
+    const bar = el("span", "tier-bar");
+    const legend = el("span", "tier-legend");
+    for (const [id, w] of Object.entries(difficulty.tierWeights)) {
+      const seg = el("span", "tier-seg tier-" + id);
+      seg.style.width = w * 100 + "%";
+      bar.append(seg);
+      legend.append(el("span", "tier-key tier-" + id, tierMap[id].name + " " + pct(w)));
+    }
+    wrap.append(el("span", "tier-mix-label", "Hyökkääjät:"), bar, legend);
+    return wrap;
+  }
+
   function startGame(difficulty) {
     state.difficulty = difficulty;
     state.selected = new Set();
-    state.lastScenarioId = null;
     $("org-name").textContent = "· " + difficulty.name;
     renderControls();
     show("build");
@@ -129,17 +144,14 @@
 
   /* ---------- Hyökkäys ---------- */
 
-  function pickScenario() {
-    const pool = data.scenarios.filter((s) => s.id !== state.lastScenarioId);
-    const s = pool[Math.floor(Math.random() * pool.length)];
-    state.lastScenarioId = s.id;
-    return s;
-  }
-
   function launchAttack() {
     if (state.selected.size === 0 && !confirm("Et valinnut yhtään kontrollia. Hyökätäänkö silti?")) return;
-    const scenario = pickScenario();
-    state.result = engine.runAttack(scenario, state.selected, data, state.difficulty.impactScale);
+    const threat = engine.pickThreat(state.difficulty, data);
+    state.result = engine.runAttack(threat.scenario, state.selected, data, {
+      impactScale: state.difficulty.impactScale,
+      tier: threat.tier
+    });
+    state.result.probability = threat.probability;
     renderAttack(state.result);
     show("attack");
   }
@@ -166,6 +178,10 @@
     $("attack-icon").textContent = r.scenario.icon;
     $("attack-title").textContent = r.scenario.name;
     $("attack-intro").textContent = r.scenario.intro;
+    $("attack-tier").className = "tier-badge tier-" + r.tier.id;
+    $("attack-tier").textContent = r.tier.icon + " Hyökkääjä: " + r.tier.name;
+    $("attack-tier-desc").textContent =
+      r.tier.desc + " Tällaisen hyökkäyksen osuus organisaatiosi uhista: " + pct(r.probability) + ".";
     const list = $("attack-timeline");
     list.replaceChildren();
 
@@ -173,8 +189,13 @@
       const defence = st.contributors.length
         ? "Puolustus: " + controlNames(st.contributors) + " → torjunnan todennäköisyys " + pct(st.p)
         : "Ei yhtään kontrollia tätä vaihetta vastaan.";
-      const outcome = st.blocked ? "🛑 Hyökkäys pysäytettiin!" : "➡️ Hyökkääjä pääsi läpi.";
-      return timelineItem(st.blocked ? "blocked" : "passed", i + 1 + ". " + st.name, st.text, defence, outcome);
+      const outcome = st.blocked
+        ? "🛑 Hyökkäys pysäytettiin!"
+        : st.gaveUp
+          ? "🏳️ Hyökkääjä epäonnistui omin avuin ja luovutti."
+          : "➡️ Hyökkääjä pääsi läpi.";
+      const cls = st.blocked ? "blocked" : st.gaveUp ? "gaveup" : "passed";
+      return timelineItem(cls, i + 1 + ". " + st.name, st.text, defence, outcome);
     });
 
     // Vaiheet, joihin hyökkäys ei koskaan edennyt
@@ -237,17 +258,19 @@
   /* ---------- Tulokset ---------- */
 
   function renderResult(r) {
-    const scale = state.difficulty.impactScale;
     const budget = state.difficulty.budget;
 
     $("result-hero").className = "panel result-hero grade-" + r.grade.id;
     $("result-emoji").textContent = r.grade.emoji;
-    $("result-scenario").textContent = r.scenario.icon + " " + r.scenario.name;
+    $("result-scenario").textContent = r.scenario.icon + " " + r.scenario.name + " · " + r.tier.icon + " " + r.tier.name;
     $("result-title").textContent = r.grade.label;
     $("result-score").textContent = r.score;
 
     let summary;
-    if (!r.breached && r.blockedAt === 0) {
+    if (r.gaveUp) {
+      summary = "Hyökkääjä epäonnistui omin avuin vaiheessa " + (r.blockedAt + 1) + "/" + r.scenario.stages.length +
+        ". Tällä kertaa kävi tuuri – katso riskiprofiilista, kestäisikö kokoonpanosi seuraavan yrityksen.";
+    } else if (!r.breached && r.blockedAt === 0) {
       summary = "Hyökkäys pysäytettiin jo ensimmäisessä vaiheessa. Erinomaista!";
     } else if (!r.breached) {
       summary =
@@ -282,8 +305,8 @@
       );
     }
 
-    renderLessons(r, scale, budget);
-    renderRiskProfile(scale);
+    renderLessons(r, budget);
+    renderRiskProfile();
 
     const chosen = $("chosen-list");
     chosen.replaceChildren();
@@ -298,11 +321,17 @@
     show("result");
   }
 
-  function renderLessons(r, scale, budget) {
+  function renderLessons(r, budget) {
     const ul = $("lessons");
     ul.replaceChildren();
 
-    const additions = engine.bestAdditions(r.scenario, state.selected, data, scale, budget).slice(0, 3);
+    const additions = engine.bestAdditions(
+      r.scenario,
+      state.selected,
+      data,
+      { impactScale: state.difficulty.impactScale, tier: r.tier },
+      budget
+    ).slice(0, 3);
     if (additions.length === 0) {
       ul.append(el("li", null, "Kokoonpanosi oli jo niin vahva, ettei yksittäinen lisäys olisi juuri auttanut tätä uhkaa vastaan."));
     }
@@ -332,15 +361,18 @@
     }
   }
 
-  function renderRiskProfile(scale) {
-    const profile = engine.riskProfile(state.selected, data, scale);
+  function renderRiskProfile() {
+    const profile = engine.riskProfile(state.selected, data, state.difficulty);
     $("resilience-value").textContent = pct(profile.resilience);
+    $("expected-loss").textContent = money(profile.expectedLoss);
+    $("undefended-loss").textContent = money(profile.undefendedLoss);
     const wrap = $("risk-profile");
     wrap.replaceChildren();
 
     for (const row of profile.rows) {
       const item = el("div", "risk-row" + (row.scenario.id === state.result.scenario.id ? " current" : ""));
       const label = el("div", "risk-label", row.scenario.icon + " " + row.scenario.name);
+      label.append(el("span", "risk-prob", pct(row.probability) + " uhista"));
       const bar = el("div", "risk-bar");
       const fill = el("div", "risk-fill");
       fill.style.width = Math.max(1, row.ratio * 100) + "%";

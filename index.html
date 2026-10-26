@@ -25,10 +25,11 @@
         <h2 id="intro-title">Olet yrityksen uusi tietoturvajohtaja</h2>
         <p>Hallitus on myöntänyt sinulle budjetin tietoturvaan. Valitse kontrollit, joilla suojaat yrityksen järjestelmät – <strong>kaikkea et voi saada</strong>.</p>
         <ul class="rules">
-          <li><span aria-hidden="true">💶</span> Jokainen kontrolli maksaa. Budjetti ei riitä kaikkeen.</li>
-          <li><span aria-hidden="true">😤</span> Osa kontrolleista hankaloittaa työntekoa. Liika <strong>käyttäjäkitka</strong> saa käyttäjät kiertämään suojauksia, ja niiden teho heikkenee.</li>
-          <li><span aria-hidden="true">🎲</span> Lopuksi järjestelmää vastaan hyökätään <strong>satunnaisella uhkaskenaariolla</strong>. Et tiedä etukäteen, mikä se on.</li>
-          <li><span aria-hidden="true">📊</span> Näet, miten valintasi pärjäsivät – ja mitä olisi kannattanut tehdä toisin.</li>
+          <li><span class="rule-icon" aria-hidden="true">💶</span><div>Jokainen kontrolli maksaa. Budjetti ei riitä kaikkeen.</div></li>
+          <li><span class="rule-icon" aria-hidden="true">😤</span><div>Osa kontrolleista hankaloittaa työntekoa. Liika <strong>käyttäjäkitka</strong> saa käyttäjät kiertämään suojauksia, ja niiden teho heikkenee.</div></li>
+          <li><span class="rule-icon" aria-hidden="true">🎲</span><div>Lopuksi järjestelmää vastaan hyökätään <strong>satunnaisella uhkaskenaariolla</strong>. Et tiedä etukäteen, mikä se on.</div></li>
+          <li><span class="rule-icon" aria-hidden="true">🎯</span><div>Uhat arvotaan organisaation koon mukaan. Pieneen yritykseen kohdistuu enimmäkseen <strong>perustason</strong> automatisoituja hyökkäyksiä, jotka usein epäonnistuvat itsestäänkin. Suuryritys kiinnostaa myös <strong>edistyneitä</strong> rikollisryhmiä ja <strong>huipputason</strong> valtiollisia toimijoita.</div></li>
+          <li><span class="rule-icon" aria-hidden="true">📊</span><div>Näet, miten valintasi pärjäsivät – ja mitä olisi kannattanut tehdä toisin.</div></li>
         </ul>
         <h3>Valitse organisaatio</h3>
         <div id="difficulty-list" class="difficulty-list"></div>
@@ -67,6 +68,8 @@
             <p class="eyebrow">Uhkaskenaario</p>
             <h2 id="attack-title"></h2>
             <p id="attack-intro" class="muted"></p>
+            <p><span id="attack-tier" class="tier-badge"></span></p>
+            <p id="attack-tier-desc" class="muted small"></p>
           </div>
         </div>
         <ol id="attack-timeline" class="timeline"></ol>
@@ -108,10 +111,11 @@
 
       <div class="panel">
         <h3>📊 Kokoonpanosi riskiprofiili kaikkia uhkia vastaan</h3>
-        <p class="muted">Odotettu vahinko kussakin skenaariossa valitsemillasi kontrolleilla. Yksi hyökkäys on aina osittain tuuria – riskiprofiili kertoo, kuinka hyvin kokoonpano kestää <em>keskimäärin</em>.</p>
-        <div class="resilience">
-          <span>Kokonaiskestävyys</span>
-          <strong id="resilience-value"></strong>
+        <p class="muted">Odotettu vahinko kussakin skenaariossa valitsemillasi kontrolleilla, painotettuna sillä, kuinka todennäköisesti kukin hyökkääjätaso organisaatiotasi uhkaa. Yksi hyökkäys on aina osittain tuuria – riskiprofiili kertoo, kuinka hyvin kokoonpano kestää <em>keskimäärin</em>.</p>
+        <div class="stat-row">
+          <div class="stat"><span>Kokonaiskestävyys</span><strong id="resilience-value"></strong></div>
+          <div class="stat"><span>Odotettu vahinko / hyökkäys</span><strong id="expected-loss"></strong></div>
+          <div class="stat"><span>Ilman kontrolleja</span><strong id="undefended-loss" class="muted"></strong></div>
         </div>
         <div id="risk-profile" class="risk-profile"></div>
       </div>

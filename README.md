@@ -56,6 +56,8 @@ No build step and no dependencies. Open `index.html` in a browser, or serve the 
 npm start   # local server at http://localhost:8080
 ```
 
+After a change, bump the `?v=` number on the script and style links in `index.html` so browsers don't use old cached files.
+
 ## Tests
 
 The game logic (`js/engine.js`) is separate from the UI and is tested with Node.js:

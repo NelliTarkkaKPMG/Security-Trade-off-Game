@@ -11,7 +11,7 @@ You are a company's new CISO. You have a **limited budget** and pick security co
    - a **cost** that comes out of your budget, and
    - some **user friction** 😤. If friction goes over the limit, users start working around the controls and every preventive control loses effectiveness.
 3. **Launch the attack.** The threat is drawn **based on company size**:
-   - first the attacker's skill level, then one of 9 scenarios (ransomware, CEO fraud, credential stuffing, SQL injection, DDoS, insider threat, supply-chain attack, lost laptop, unpatched VPN appliance), weighted by how common each one is.
+   - first the attacker's skill level, then one of 9 scenarios (ransomware, invoice fraud, credential stuffing, SQL injection, DDoS, insider threat, supply-chain attack, lost laptop, unpatched VPN appliance), weighted by how common each one is.
    - Each scenario only occurs at the attacker levels typical for it. For example, a supply-chain attack is never basic-level, and a lost laptop is always basic-level.
 
    | Attacker | Startup | Growth company | Listed company | Characteristics |
@@ -32,7 +32,8 @@ You are a company's new CISO. You have a **limited budget** and pick security co
 - **Outcomes are graded, not just "stopped or breached":**
   - A stage that the controls did not stop is not necessarily lost. The controls still limit the attack's reach (for example, segmentation stops ransomware from encrypting the whole network).
   - The severity of a breach varies randomly (50–100 % of the worst case).
-  - What matters is *how fast* the attack is detected. Detection within hours reduces the damage by 30–70 %, while detection only after weeks reduces it by almost nothing.
+  - What matters is *how fast* the attack is detected. Detection times are realistic for each scenario: a DDoS is noticed within minutes or hours, ransomware at the latest when the files get encrypted, CEO/invoice fraud when the real supplier chases an unpaid invoice, and a supply-chain backdoor can stay hidden for months. Fast detection reduces the damage by 30–70 %, late detection by almost nothing.
+  - A control only affects the stages where it really works (for example, disk encryption doesn't stop SQL injection, and backups don't undo a data leak). The tests check these rules.
   - Recovery controls (backups, incident response plan) reduce the damage further.
 - The result is placed on a five-level scale: *Torjuttu* (stopped) → *Pieni häiriö* (minor disruption) → *Hallittu tietoturvaloukkaus* (contained breach) → *Vakava tietoturvaloukkaus* (serious breach) → *Katastrofi* (catastrophe). The results screen breaks the damage down step by step, so you can see how much each factor affected it.
 - The risk profile computes the **expected loss** analytically against the organisation's actual threat landscape, weighted by the probability of each scenario and attacker level, and compares it with the situation without any controls.

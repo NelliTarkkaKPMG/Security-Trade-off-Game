@@ -217,9 +217,7 @@
           d.contributors.length
             ? "Havainnointi: " + controlNames(d.contributors) + " → todennäköisyys " + pct(d.p)
             : "Ei havaitsevia kontrolleja.",
-          d.detected
-            ? "✅ Hyökkäys havaittiin " + d.time + " – vahingot −" + pct(1 - d.factor) + "."
-            : "❌ Hyökkäys huomattiin vasta " + d.time + "."
+          (d.detected ? "✅ " : "❌ ") + d.text
         )
       );
       const rc = r.recovery;
@@ -286,9 +284,7 @@
     } else {
       summary = "Hyökkääjä läpäisi kaikki puolustuslinjat";
       summary += r.scope < 0.95 ? ", mutta kontrollit rajasivat sen ulottuvuutta. " : ". ";
-      summary += r.detection.detected
-        ? "Hyökkäys havaittiin " + r.detection.time + "."
-        : "Hyökkäys huomattiin vasta " + r.detection.time + ".";
+      summary += r.detection.text;
     }
     $("result-summary").textContent = summary;
 
@@ -309,10 +305,7 @@
       breakdown.append(el("li", null, "Pahimmillaan: " + money(r.impact)));
       step("Hyökkäys jäi tällä kertaa suppeammaksi:", r.severity);
       if (r.scope < 0.995) step("Kontrollit rajasivat leviämistä:", r.scope);
-      step(
-        (r.detection.detected ? "Havaittiin " : "Havaittiin vasta ") + r.detection.time + ":",
-        r.detection.factor
-      );
+      step(r.detection.detected ? "Nopea havaitseminen:" : "Myöhäinen havaitseminen:", r.detection.factor);
       for (const c of r.recovery.contributors) step(controlMap[c.id].short + ":", 1 - c.effect);
     } else if (r.blockedAt > 0) {
       breakdown.append(

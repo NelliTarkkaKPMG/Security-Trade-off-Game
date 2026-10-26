@@ -229,3 +229,43 @@ test("scenario-level give-up chance applies and uses the scenario's story", () =
   const r = engine.runAttack(laptop, [], data, { tier: tier("basic"), rng: () => 0.3 });
   assert.ok(r.gaveUp);
 });
+
+test("every scenario has realistic, scenario-specific detection texts", () => {
+  for (const s of data.scenarios) {
+    for (const key of ["detected", "undetected"]) {
+      const d = s.detection && s.detection[key];
+      assert.ok(d && d.text, `${s.id} ${key}`);
+      const hasN = d.text.includes("{n}");
+      assert.equal(hasN, d.min != null && d.max != null, `${s.id} ${key}: {n} needs min/max`);
+      if (hasN) assert.ok(d.min >= 1 && d.max > d.min, `${s.id} ${key}`);
+    }
+  }
+  const ddos = data.scenarios.find((s) => s.id === "ddos");
+  assert.ok(!/päiv|viiko|kuukau/.test(ddos.detection.undetected.text), "a DDoS is noticed within hours");
+  const ransomware = data.scenarios.find((s) => s.id === "ransomware");
+  assert.ok(!ransomware.detection.undetected.text.includes("{n}"), "encryption is noticed immediately");
+});
+
+test("detection text uses the scenario's own time range", () => {
+  const ddos = data.scenarios.find((s) => s.id === "ddos");
+  const seq = (values) => { let i = 0; return () => values[Math.min(i++, values.length - 1)]; };
+  const r = engine.runAttack(ddos, [], data, { rng: seq([0.99, 0.99, 0.999, 0.99, 1 - 1e-9]) });
+  assert.ok(r.breached && !r.detection.detected);
+  assert.match(r.detection.text, /vasta 8 tunnin kuluttua/);
+});
+
+test("controls only appear where they can actually help", () => {
+  const prevents = (id) => data.scenarios.find((s) => s.id === id).stages.flatMap((st) => Object.keys(st.prevent));
+  // Disk encryption does not stop data read through a running application or by a logged-in user.
+  assert.ok(!prevents("webapp").includes("encryption"));
+  assert.ok(!prevents("insider").includes("encryption"));
+  // Customer accounts are not protected by employee privilege management.
+  assert.ok(!prevents("stuffing").includes("pam"));
+  // EDR / allowlisting cannot be installed on a VPN appliance.
+  const vpnDevice = data.scenarios.find((s) => s.id === "vpn").stages.slice(0, 2).flatMap((st) => Object.keys(st.prevent));
+  assert.ok(!vpnDevice.includes("edr") && !vpnDevice.includes("allowlist"));
+  // Backups cannot undo stolen data.
+  for (const id of ["webapp", "insider", "stuffing", "bec", "laptop"]) {
+    assert.ok(!("backup" in data.scenarios.find((s) => s.id === id).recover), id);
+  }
+});

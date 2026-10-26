@@ -126,13 +126,12 @@
     return GRADES.find((g, i) => i > 0 && ratio < g.max) || GRADES[GRADES.length - 1];
   }
 
-  // Havaitsemisaika tarinaa varten: nopea havainto tunneissa, hidas päivissä.
-  function detectionTime(detected, u) {
-    if (detected) {
-      const hours = Math.max(1, Math.round(1 + u * 47));
-      return hours + " tunnissa";
-    }
-    return Math.round(7 + u * 53) + " päivän kuluttua";
+  // Skenaariokohtainen kuvaus siitä, milloin ja miten hyökkäys huomattiin.
+  // u (0–1) on sama luku, joka määrää vahinkokertoimen: nopeampi = pienempi vahinko.
+  function detectionText(scenario, detected, u) {
+    const d = scenario.detection[detected ? "detected" : "undetected"];
+    if (d.min == null) return d.text;
+    return d.text.replace("{n}", String(Math.round(d.min + (d.max - d.min) * u)));
   }
 
   /**
@@ -205,7 +204,7 @@
       const detected = roll < d.p;
       const u = rng();
       const factor = lerp(detected ? DETECTED : UNDETECTED, u);
-      detection = { p: d.p, roll, detected, factor, time: detectionTime(detected, u), contributors: d.contributors };
+      detection = { p: d.p, roll, detected, factor, text: detectionText(scenario, detected, u), contributors: d.contributors };
       recovery = recoveryFactor(scenario, set);
       damage = impact * severity * scope * factor * recovery.factor;
     } else {

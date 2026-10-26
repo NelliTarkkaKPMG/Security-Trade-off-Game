@@ -5,6 +5,10 @@
  * yksinään pysäyttää hyökkäyksen kyseisessä vaiheessa. Useampi kontrolli
  * samassa vaiheessa yhdistetään: P(torjunta) = 1 - Π(1 - tehokkuus).
  *
+ * detection kertoo, miten ja milloin hyökkäys realistisesti huomataan tässä
+ * skenaariossa. {n} korvataan luvulla väliltä min–max: nopeampi havainto
+ * tarkoittaa pienempää vahinkoa.
+ *
  * Skenaarion valinnainen giveUp nostaa hyökkääjän luovuttamisen todennäköisyyttä
  * (vähintään tämä per vaihe) ja giveUpText kertoo, miltä se näyttää tarinassa.
  *
@@ -222,7 +226,7 @@
       strength: 0.6,
       giveUp: 0.2,
       impactScale: 0.5,
-      desc: "Automatisoituja, opportunistisia hyökkäyksiä valmiilla työkaluilla. Siirtyy helpommaan kohteeseen, jos vastaan tulee esteitä."
+      desc: "Opportunistinen hyökkääjä, joka käyttää valmiita työkaluja ja siirtyy helpompaan kohteeseen, jos vastaan tulee esteitä."
     },
     {
       id: "advanced",
@@ -255,7 +259,7 @@
       name: "Kiristyshaittaohjelma",
       icon: "💀",
       impact: 400,
-      intro: "Rikollisryhmä yrittää salata yrityksen kaikki tiedostot ja vaatii lunnaita.",
+      intro: "Rikollisryhmä yrittää salata yrityksen tiedostot ja vaatii lunnaita.",
       stages: [
         {
           name: "Tietojenkalastelusähköposti",
@@ -274,39 +278,47 @@
         },
         {
           name: "Tiedostojen salaus",
-          text: "Kiristysohjelma käynnistetään kaikilla koneilla samanaikaisesti.",
+          text: "Kiristysohjelma käynnistetään kaikilla saavutetuilla koneilla samanaikaisesti.",
           prevent: { edr: 0.3 }
         }
       ],
       detect: { siem: 0.6, edr: 0.3 },
+      detection: {
+        detected: { text: "Hyökkääjän liikkeet verkossa havaittiin {n} tunnissa, ja koneita ehdittiin eristää ennen kuin salaus levisi kaikkialle.", min: 1, max: 12 },
+        undetected: { text: "Hyökkäys huomattiin vasta, kun tiedostot oli jo salattu ja lunnasvaatimus ilmestyi näytöille." }
+      },
       recover: { backup: 0.7, irplan: 0.3 }
     },
     {
       id: "bec",
       likelihood: 3,
       tiers: ["basic", "advanced"],
-      name: "Toimitusjohtajahuijaus",
+      name: "Laskutuspetos",
       icon: "🎭",
       impact: 250,
-      intro: "Huijari esiintyy toimitusjohtajana ja yrittää saada talousosaston maksamaan väärälle tilille.",
+      intro: "Huijari kaappaa talousosaston sähköpostitilin ja yrittää ohjata toimittajan laskun maksun omalle tililleen.",
       stages: [
         {
-          name: "Huijausviesti",
-          text: "Talousjohtaja saa kiireellisen viestin 'toimitusjohtajalta'.",
-          prevent: { email: 0.45, training: 0.3 }
+          name: "Tunnusten kalastelu",
+          text: "Talousjohtaja saa viestin, jonka linkki vie aidolta näyttävälle Microsoft 365 -kirjautumissivulle.",
+          prevent: { email: 0.45, training: 0.35 }
         },
         {
-          name: "Tunnusten kalastelu",
-          text: "Viestin linkki vie aidolta näyttävälle kirjautumissivulle.",
-          prevent: { mfa: 0.7, training: 0.3 }
+          name: "Sähköpostitilin kaappaus",
+          text: "Huijari yrittää kirjautua talousjohtajan tilille kalastellulla salasanalla.",
+          prevent: { mfa: 0.75 }
         },
         {
           name: "Maksuohjeen muutos",
-          text: "Kaapatulla tilillä pyydetään muuttamaan toimittajan tilinumero.",
-          prevent: { training: 0.4, siem: 0.2 }
+          text: "Kaapatulta tililtä vastataan aitoon laskuketjuun ja pyydetään maksamaan uudelle tilinumerolle.",
+          prevent: { training: 0.45, siem: 0.2 }
         }
       ],
       detect: { siem: 0.4 },
+      detection: {
+        detected: { text: "Poikkeava kirjautuminen havaittiin {n} tunnissa, ja pankkia pyydettiin pysäyttämään maksu.", min: 1, max: 24 },
+        undetected: { text: "Huijaus paljastui vasta, kun oikea toimittaja kysyi maksamattoman laskun perään {n} päivän kuluttua.", min: 7, max: 30 }
+      },
       recover: { irplan: 0.4 }
     },
     {
@@ -316,20 +328,24 @@
       name: "Tunnusten täyttöhyökkäys",
       icon: "🤖",
       impact: 200,
-      intro: "Bottiverkko kokeilee miljoonia muualta vuotaneita salasanoja asiakasportaaliin.",
+      intro: "Bottiverkko kokeilee muualta vuotaneita salasanoja asiakasportaaliin.",
       stages: [
         {
           name: "Vuotaneiden salasanojen kokeilu",
-          text: "Tuhannet kirjautumisyritykset sekunnissa eri IP-osoitteista.",
-          prevent: { mfa: 0.8, waf: 0.4, ddos: 0.2 }
+          text: "Tuhansia kirjautumisyrityksiä minuutissa eri IP-osoitteista.",
+          prevent: { mfa: 0.8, waf: 0.4, ddos: 0.15 }
         },
         {
-          name: "Tilien kaappaus",
-          text: "Onnistuneilla tunnuksilla haetaan asiakkaiden henkilötietoja.",
-          prevent: { pam: 0.3, siem: 0.3 }
+          name: "Asiakastilien hyväksikäyttö",
+          text: "Onnistuneilla tunnuksilla kirjaudutaan satoihin asiakastileihin ja kerätään henkilötietoja.",
+          prevent: { siem: 0.4, waf: 0.25 }
         }
       ],
       detect: { siem: 0.5, waf: 0.2 },
+      detection: {
+        detected: { text: "Kirjautumispiikki havaittiin {n} tunnissa, ja kaapatut tilit lukittiin.", min: 1, max: 12 },
+        undetected: { text: "Tilikaappaukset paljastuivat vasta asiakkaiden valituksista {n} päivän kuluttua.", min: 2, max: 14 }
+      },
       recover: { irplan: 0.4 }
     },
     {
@@ -343,7 +359,7 @@
       stages: [
         {
           name: "Haavoittuvuuksien etsintä",
-          text: "Automaattinen skanneri käy läpi kaikki verkkokaupan lomakkeet.",
+          text: "Automaattinen skanneri käy läpi verkkokaupan lomakkeet ja hakukentät.",
           prevent: { pentest: 0.5, waf: 0.4 }
         },
         {
@@ -352,13 +368,17 @@
           prevent: { waf: 0.5, patch: 0.3, pentest: 0.3 }
         },
         {
-          name: "Tietokannan tyhjennys",
-          text: "Asiakastiedot ja maksukorttien tiedot kopioidaan ulos.",
-          prevent: { pam: 0.35, segment: 0.3, encryption: 0.2 }
+          name: "Asiakastietojen kopiointi",
+          text: "Sovelluksen kautta luetaan asiakkaiden yhteystiedot ja salasanatiivisteet.",
+          prevent: { pam: 0.4, waf: 0.2, siem: 0.2 }
         }
       ],
       detect: { siem: 0.5, waf: 0.2 },
-      recover: { irplan: 0.4, backup: 0.1 }
+      detection: {
+        detected: { text: "Poikkeavat tietokantakyselyt havaittiin {n} tunnissa, ja haavoittuva hakukenttä suljettiin.", min: 1, max: 24 },
+        undetected: { text: "Tietovuoto paljastui vasta, kun asiakastiedot ilmestyivät myyntiin rikollisfoorumille {n} päivän kuluttua.", min: 14, max: 60 }
+      },
+      recover: { irplan: 0.4 }
     },
     {
       id: "ddos",
@@ -371,7 +391,7 @@
       stages: [
         {
           name: "Liikennetulva",
-          text: "Satoja gigabittejä roskaliikennettä sekunnissa.",
+          text: "Kymmeniä gigabittejä roskaliikennettä sekunnissa.",
           prevent: { ddos: 0.85, waf: 0.2 }
         },
         {
@@ -380,7 +400,11 @@
           prevent: { waf: 0.4, ddos: 0.4 }
         }
       ],
-      detect: { siem: 0.3 },
+      detect: { siem: 0.5 },
+      detection: {
+        detected: { text: "Palvelunesto tunnistettiin {n} minuutissa, ja liikenne ohjattiin suodatukseen.", min: 5, max: 30 },
+        undetected: { text: "Palvelunesto tunnistettiin vasta {n} tunnin kuluttua – siihen asti vikaa etsittiin omista palvelimista.", min: 2, max: 8 }
+      },
       recover: { irplan: 0.5 }
     },
     {
@@ -399,16 +423,20 @@
         },
         {
           name: "Tietojen keruu",
-          text: "Asiakasrekisteri ja tarjoukset ladataan yksi kerrallaan omalle koneelle.",
-          prevent: { siem: 0.35, encryption: 0.1 }
+          text: "Asiakasrekisteri ja tarjoukset ladataan omalle koneelle.",
+          prevent: { siem: 0.35 }
         },
         {
           name: "Tietojen vienti ulos",
-          text: "Tiedostot lähetetään yksityiseen sähköpostiin ja USB-tikulle.",
-          prevent: { edr: 0.3, siem: 0.3, email: 0.2 }
+          text: "Tiedostot lähetetään yksityiseen sähköpostiin ja kopioidaan USB-tikulle.",
+          prevent: { edr: 0.3, siem: 0.3, email: 0.15 }
         }
       ],
       detect: { siem: 0.6 },
+      detection: {
+        detected: { text: "Poikkeava tiedonsiirto havaittiin {n} tunnissa, ja tunnukset suljettiin.", min: 1, max: 48 },
+        undetected: { text: "Tietovuoto paljastui vasta, kun asiakkaita alkoi siirtyä kilpailijalle {n} viikon kuluttua.", min: 2, max: 8 }
+      },
       recover: { irplan: 0.4 }
     },
     {
@@ -418,17 +446,17 @@
       name: "Toimitusketjuhyökkäys",
       icon: "📦",
       impact: 450,
-      intro: "Valtiollinen toimija on murtautunut käyttämänne ohjelmiston toimittajan päivityspalvelimelle.",
+      intro: "Hyökkääjä on murtautunut käyttämänne ohjelmiston toimittajan päivityspalvelimelle.",
       stages: [
         {
           name: "Saastunut päivitys",
-          text: "Luotettu toimittaja jakaa allekirjoitetun päivityksen, jossa on takaovi.",
-          prevent: { vendor: 0.45, allowlist: 0.2 }
+          text: "Luotettu toimittaja jakaa aidosti allekirjoitetun päivityksen, jossa on takaovi.",
+          prevent: { vendor: 0.25 }
         },
         {
           name: "Takaoven aktivoituminen",
-          text: "Takaovi herää viikkojen hiljaiselon jälkeen.",
-          prevent: { edr: 0.45, segment: 0.25 }
+          text: "Takaovi herää viikkojen hiljaiselon jälkeen ja alkaa tutkia ympäristöä.",
+          prevent: { edr: 0.35, segment: 0.25 }
         },
         {
           name: "Komentoyhteys ulos",
@@ -437,7 +465,11 @@
         }
       ],
       detect: { siem: 0.5, edr: 0.3 },
-      recover: { irplan: 0.4, backup: 0.3 }
+      detection: {
+        detected: { text: "Epäilyttävä yhteys hyökkääjän palvelimelle havaittiin {n} päivässä.", min: 1, max: 7 },
+        undetected: { text: "Takaovi paljastui vasta, kun toimittaja tiedotti murrosta {n} kuukauden kuluttua.", min: 2, max: 9 }
+      },
+      recover: { irplan: 0.4, backup: 0.2 }
     },
     {
       id: "laptop",
@@ -459,11 +491,15 @@
         {
           name: "Kirjautuminen pilvipalveluihin",
           text: "Levyltä löytyy selaimeen tallennettuja salasanoja, joilla yritetään kirjautua yrityksen sähköpostiin ja pilvipalveluihin.",
-          prevent: { mfa: 0.8, pam: 0.2 }
+          prevent: { mfa: 0.8 }
         }
       ],
-      detect: { siem: 0.2 },
-      recover: { backup: 0.4, irplan: 0.3 }
+      detect: { siem: 0.3 },
+      detection: {
+        detected: { text: "Kirjautuminen tuntemattomalta laitteelta havaittiin {n} tunnissa, ja tunnukset suljettiin.", min: 1, max: 6 },
+        undetected: { text: "Tunnukset suljettiin vasta, kun myyntipäällikkö ilmoitti laitteen kadonneeksi {n} päivän kuluttua.", min: 1, max: 3 }
+      },
+      recover: { irplan: 0.3 }
     },
     {
       id: "vpn",
@@ -475,22 +511,26 @@
       intro: "VPN-laitteesta on julkaistu kriittinen haavoittuvuus – ja hyökkääjät skannaavat koko internetiä.",
       stages: [
         {
-          name: "Haavoittuvuuden skannaus",
-          text: "Automaattinen työkalu löytää yrityksen VPN-laitteen.",
+          name: "Haavoittuvuuden hyväksikäyttö",
+          text: "Automaattinen työkalu löytää yrityksen VPN-laitteen ja kokeilee julkaistua hyökkäyskoodia.",
           prevent: { patch: 0.7, pentest: 0.3 }
         },
         {
-          name: "Etäkoodin suoritus",
-          text: "Haavoittuvuuden kautta hyökkääjä saa komentorivin laitteelle.",
-          prevent: { edr: 0.35, allowlist: 0.3 }
+          name: "Tunnusten keruu",
+          text: "Hyökkääjä kerää laitteelta VPN-käyttäjien salasanoja.",
+          prevent: { mfa: 0.5 }
         },
         {
           name: "Pääsy sisäverkkoon",
-          text: "VPN-laitteelta hypätään suoraan sisäverkon palvelimille.",
-          prevent: { segment: 0.5, pam: 0.3, mfa: 0.25 }
+          text: "VPN-laitteelta siirrytään sisäverkon palvelimille.",
+          prevent: { segment: 0.5, pam: 0.3, edr: 0.3 }
         }
       ],
-      detect: { siem: 0.5 },
+      detect: { siem: 0.5, edr: 0.2 },
+      detection: {
+        detected: { text: "Poikkeava toiminta VPN-laitteella havaittiin {n} tunnissa.", min: 1, max: 24 },
+        undetected: { text: "Murto paljastui vasta, kun Kyberturvallisuuskeskus ilmoitti siitä {n} päivän kuluttua.", min: 5, max: 30 }
+      },
       recover: { backup: 0.3, irplan: 0.35 }
     }
   ];

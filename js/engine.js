@@ -10,15 +10,24 @@
  *     epäonnistua tai luovuttaa itsestään.
  *  3. Jos hyökkäys pysähtyy vaiheeseen i, vahinkoa syntyy vain vähän
  *     (selvittely- ja puhdistuskulut kasvavat mitä pidemmälle päästiin).
- *  4. Jos kaikki vaiheet läpäistään, syntyy tietoturvaloukkaus. Havaitsevat
- *     kontrollit voivat puolittaa vahingon ja palauttavat kontrollit
- *     pienentävät sitä edelleen.
- *  5. Liian suuri käyttäjäkitka saa käyttäjät kiertämään kontrolleja, mikä
+ *  4. Vaihe, jota kontrollit eivät pysäyttäneet, ei ole välttämättä
+ *     menetetty: kontrollit rajaavat silti hyökkäyksen laajuutta.
+ *  5. Jos kaikki vaiheet läpäistään, syntyy tietoturvaloukkaus, jonka
+ *     vakavuus vaihtelee. Mitä nopeammin hyökkäys havaitaan, sitä pienempi
+ *     vahinko, ja palauttavat kontrollit pienentävät sitä edelleen.
+ *  6. Liian suuri käyttäjäkitka saa käyttäjät kiertämään kontrolleja, mikä
  *     heikentää kaikkien ennaltaehkäisevien kontrollien tehoa.
  */
 (function (root) {
   const STAGE_DAMAGE = 0.05; // vahinko-osuus per läpäisty vaihe, jos hyökkäys pysäytetään
-  const DETECTION_FACTOR = 0.5; // havaittu loukkaus aiheuttaa puolet vahingosta
+  const CONTAINMENT = 0.5; // läpäisty vaihe: kontrollit rajaavat laajuutta osuudella CONTAINMENT * p
+  const SEVERITY_MIN = 0.5; // satunnainen vakavuus väliltä [SEVERITY_MIN, 1]
+  const SEVERITY_MEAN = (SEVERITY_MIN + 1) / 2;
+  // Havaitsemisen nopeus: havaittu loukkaus 0.3–0.7 vahingosta, havaitsematon 0.85–1.
+  const DETECTED = { min: 0.3, max: 0.7 };
+  const UNDETECTED = { min: 0.85, max: 1 };
+  const mean = (r) => (r.min + r.max) / 2;
+  const lerp = (r, u) => r.min + (r.max - r.min) * u;
   const FRICTION_PENALTY = 0.07; // tehon lasku per kitkapiste rajan yli
   const MIN_MULTIPLIER = 0.6;
 
@@ -98,11 +107,27 @@
     return { impactScale: o.impactScale || 1, tier: o.tier || NEUTRAL_TIER, rng: o.rng || Math.random };
   }
 
+  // Lopputuloksen asteikko. max = vahinko-osuuden yläraja kullekin tasolle.
+  const GRADES = [
+    { id: "blocked", max: 0, label: "Torjuttu", emoji: "🏆" },
+    { id: "minor", max: 0.1, label: "Pieni häiriö", short: "Pieni", emoji: "✅" },
+    { id: "moderate", max: 0.25, label: "Hallittu tietoturvaloukkaus", short: "Hallittu", emoji: "🟡" },
+    { id: "major", max: 0.5, label: "Vakava tietoturvaloukkaus", short: "Vakava", emoji: "⚠️" },
+    { id: "critical", max: 1, label: "Katastrofi", short: "Katastrofi", emoji: "🔥" }
+  ];
+
   function grade(ratio) {
-    if (ratio === 0) return { id: "blocked", label: "Torjuttu heti", emoji: "🏆" };
-    if (ratio < 0.2) return { id: "minor", label: "Hallinnassa", emoji: "✅" };
-    if (ratio < 0.5) return { id: "major", label: "Vakava tietoturvaloukkaus", emoji: "⚠️" };
-    return { id: "critical", label: "Katastrofi", emoji: "🔥" };
+    if (ratio === 0) return GRADES[0];
+    return GRADES.find((g, i) => i > 0 && ratio < g.max) || GRADES[GRADES.length - 1];
+  }
+
+  // Havaitsemisaika tarinaa varten: nopea havainto tunneissa, hidas päivissä.
+  function detectionTime(detected, u) {
+    if (detected) {
+      const hours = Math.max(1, Math.round(1 + u * 47));
+      return hours + " tunnissa";
+    }
+    return Math.round(7 + u * 53) + " päivän kuluttua";
   }
 
   /**
@@ -145,6 +170,7 @@
 
     const stages = [];
     let blockedAt = -1;
+    let scope = 1; // kuinka laajalle hyökkäys pääsi (1 = koko ympäristö)
     for (let i = 0; i < scenario.stages.length; i++) {
       const stage = scenario.stages[i];
       const { p, contributors } = combine(stage.prevent, set, multiplier, tier.strength);
@@ -152,7 +178,10 @@
       const roll = rng();
       const blocked = roll < p; // puolustus pysäytti
       const gaveUp = !blocked && roll < pStop; // hyökkääjä epäonnistui itse
-      stages.push({ name: stage.name, text: stage.text, p, pStop, roll, blocked, gaveUp, contributors });
+      // Läpäisty vaihe: kontrollit eivät pysäyttäneet, mutta rajasivat laajuutta.
+      const contained = blocked || gaveUp ? 0 : CONTAINMENT * p;
+      scope *= 1 - contained;
+      stages.push({ name: stage.name, text: stage.text, p, pStop, roll, blocked, gaveUp, contained, contributors });
       if (blocked || gaveUp) {
         blockedAt = i;
         break;
@@ -160,17 +189,21 @@
     }
 
     const breached = blockedAt === -1;
+    const severity = SEVERITY_MIN + (1 - SEVERITY_MIN) * rng();
     let damage;
     let detection = null;
     let recovery = null;
     if (breached) {
       const d = combine(scenario.detect, set, 1, tier.strength);
       const roll = rng();
-      detection = { p: d.p, roll, detected: roll < d.p, contributors: d.contributors };
+      const detected = roll < d.p;
+      const u = rng();
+      const factor = lerp(detected ? DETECTED : UNDETECTED, u);
+      detection = { p: d.p, roll, detected, factor, time: detectionTime(detected, u), contributors: d.contributors };
       recovery = recoveryFactor(scenario, set);
-      damage = impact * (detection.detected ? DETECTION_FACTOR : 1) * recovery.factor;
+      damage = impact * severity * scope * factor * recovery.factor;
     } else {
-      damage = impact * STAGE_DAMAGE * blockedAt;
+      damage = impact * severity * STAGE_DAMAGE * blockedAt;
     }
 
     const ratio = impact > 0 ? damage / impact : 0;
@@ -182,12 +215,14 @@
       blockedAt,
       breached,
       gaveUp: !breached && stages[blockedAt].gaveUp,
+      severity,
+      scope,
       detection,
       recovery,
       damage,
       ratio,
       score: Math.round(100 * (1 - ratio)),
-      grade: !breached && stages[blockedAt].gaveUp && ratio < 0.2
+      grade: !breached && stages[blockedAt].gaveUp && ratio < GRADES[1].max
         ? { id: "lucky", label: "Hyökkäys epäonnistui", emoji: "🍀" }
         : grade(ratio),
       friction,
@@ -204,17 +239,20 @@
     const { set, multiplier } = context(selected, data);
 
     let reach = 1; // todennäköisyys, että hyökkäys pääsee nykyiseen vaiheeseen
+    let scope = 1;
     let loss = 0;
     scenario.stages.forEach((stage, i) => {
       const { p } = combine(stage.prevent, set, multiplier, tier.strength);
       const pStop = 1 - (1 - p) * (1 - tier.giveUp);
-      loss += reach * pStop * impact * STAGE_DAMAGE * i;
+      loss += reach * pStop * impact * SEVERITY_MEAN * STAGE_DAMAGE * i;
       reach *= 1 - pStop;
+      scope *= 1 - CONTAINMENT * p;
     });
 
     const pd = combine(scenario.detect, set, 1, tier.strength).p;
     const rf = recoveryFactor(scenario, set).factor;
-    loss += reach * impact * (pd * DETECTION_FACTOR + (1 - pd)) * rf;
+    const detectFactor = pd * mean(DETECTED) + (1 - pd) * mean(UNDETECTED);
+    loss += reach * impact * SEVERITY_MEAN * scope * detectFactor * rf;
 
     return { loss, breachProbability: reach, impact, ratio: impact > 0 ? loss / impact : 0 };
   }
@@ -307,7 +345,8 @@
     riskProfile,
     bestAdditions,
     unusedControls,
-    grade
+    grade,
+    GRADES
   };
 
   if (typeof module === "object" && module.exports) {

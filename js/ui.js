@@ -189,12 +189,15 @@
       const defence = st.contributors.length
         ? "Puolustus: " + controlNames(st.contributors) + " → torjunnan todennäköisyys " + pct(st.p)
         : "Ei yhtään kontrollia tätä vaihetta vastaan.";
+      const contained = st.contained >= 0.01;
       const outcome = st.blocked
         ? "🛑 Hyökkäys pysäytettiin!"
         : st.gaveUp
           ? "🏳️ Hyökkääjä epäonnistui omin avuin ja luovutti."
-          : "➡️ Hyökkääjä pääsi läpi.";
-      const cls = st.blocked ? "blocked" : st.gaveUp ? "gaveup" : "passed";
+          : contained
+            ? "↘️ Hyökkääjä pääsi läpi, mutta kontrollit rajasivat sen ulottuvuutta −" + pct(st.contained) + "."
+            : "➡️ Hyökkääjä pääsi läpi esteettä.";
+      const cls = st.blocked ? "blocked" : st.gaveUp ? "gaveup" : contained ? "contained" : "passed";
       return timelineItem(cls, i + 1 + ". " + st.name, st.text, defence, outcome);
     });
 
@@ -210,11 +213,13 @@
         timelineItem(
           d.detected ? "blocked" : "passed",
           "🔎 Havaitseminen",
-          "Huomataanko hyökkäys ajoissa?",
+          "Kuinka nopeasti hyökkäys huomataan?",
           d.contributors.length
             ? "Havainnointi: " + controlNames(d.contributors) + " → todennäköisyys " + pct(d.p)
             : "Ei havaitsevia kontrolleja.",
-          d.detected ? "✅ Hyökkäys havaittiin – vahingot puolittuvat." : "❌ Hyökkäys huomattiin vasta liian myöhään."
+          d.detected
+            ? "✅ Hyökkäys havaittiin " + d.time + " – vahingot −" + pct(1 - d.factor) + "."
+            : "❌ Hyökkäys huomattiin vasta " + d.time + "."
         )
       );
       const rc = r.recovery;
@@ -277,25 +282,40 @@
         "Hyökkääjä eteni vaiheeseen " + (r.blockedAt + 1) + "/" + r.scenario.stages.length +
         ", mutta pysäytettiin ennen varsinaista vahinkoa.";
     } else {
-      summary = "Hyökkääjä läpäisi kaikki puolustuslinjat. ";
-      summary += r.detection.detected ? "Onneksi hyökkäys havaittiin ajoissa." : "Hyökkäys huomattiin vasta liian myöhään.";
+      summary = "Hyökkääjä läpäisi kaikki puolustuslinjat";
+      summary += r.scope < 0.95 ? ", mutta kontrollit rajasivat sen ulottuvuutta. " : ". ";
+      summary += r.detection.detected
+        ? "Hyökkäys havaittiin " + r.detection.time + "."
+        : "Hyökkäys huomattiin vasta " + r.detection.time + ".";
     }
     $("result-summary").textContent = summary;
 
     $("damage-fill").style.width = r.ratio * 100 + "%";
+    renderGradeScale(r);
     $("damage-value").textContent = money(r.damage);
     $("damage-max").textContent = money(r.impact);
 
     const breakdown = $("damage-breakdown");
     breakdown.replaceChildren();
+    // Vahinko vaihe vaiheelta: jokainen rivi näyttää kertoimen ja juoksevan summan.
+    let running = r.impact;
+    const step = (label, factor) => {
+      running *= factor;
+      breakdown.append(el("li", null, label + " −" + pct(1 - factor) + " → " + money(running)));
+    };
     if (r.breached) {
-      breakdown.append(el("li", null, "Täysi tietoturvaloukkaus: " + money(r.impact)));
-      if (r.detection.detected) breakdown.append(el("li", null, "Havaittiin ajoissa: −50 %"));
-      for (const c of r.recovery.contributors) {
-        breakdown.append(el("li", null, controlMap[c.id].short + ": −" + pct(c.effect)));
-      }
+      breakdown.append(el("li", null, "Pahimmillaan: " + money(r.impact)));
+      step("Hyökkäys jäi tällä kertaa suppeammaksi:", r.severity);
+      if (r.scope < 0.995) step("Kontrollit rajasivat leviämistä:", r.scope);
+      step(
+        (r.detection.detected ? "Havaittiin " : "Havaittiin vasta ") + r.detection.time + ":",
+        r.detection.factor
+      );
+      for (const c of r.recovery.contributors) step(controlMap[c.id].short + ":", 1 - c.effect);
     } else if (r.blockedAt > 0) {
-      breakdown.append(el("li", null, "Selvittely- ja puhdistuskulut, kun hyökkääjä ehti vaiheeseen " + (r.blockedAt + 1)));
+      breakdown.append(
+        el("li", null, "Selvittely- ja puhdistuskulut, kun hyökkääjä ehti vaiheeseen " + (r.blockedAt + 1) + ": " + money(r.damage))
+      );
     } else {
       breakdown.append(el("li", null, "Ei vahinkoja."));
     }
@@ -319,6 +339,30 @@
     if (left > 0) chosen.append(el("span", "chip chip-muted", "Käyttämättä " + money(left)));
 
     show("result");
+  }
+
+  // Viisiportainen asteikko, jolla merkki näyttää, mihin tulos osui.
+  function renderGradeScale(r) {
+    const scale = $("grade-scale");
+    scale.replaceChildren();
+    const levels = engine.GRADES.slice(1);
+    const track = el("div", "grade-track");
+    let min = 0;
+    let position = 0;
+    levels.forEach((g, i) => {
+      const seg = el("div", "grade-seg grade-seg-" + g.id + (g.id === r.grade.id ? " active" : ""));
+      seg.append(el("span", null, g.short));
+      track.append(seg);
+      if (r.ratio >= min && (r.ratio < g.max || i === levels.length - 1)) {
+        position = (i + Math.min(1, (r.ratio - min) / (g.max - min))) / levels.length;
+      }
+      min = g.max;
+    });
+    const marker = el("div", "grade-marker");
+    marker.style.left = position * 100 + "%";
+    marker.title = pct(r.ratio) + " pahimmasta mahdollisesta";
+    track.append(marker);
+    scale.append(track);
   }
 
   function renderLessons(r, budget) {

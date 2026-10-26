@@ -29,7 +29,12 @@ You are a company's new CISO. You have a **limited budget** and pick security co
 - The attacker's skill changes how effective the controls are: `e' = 1 − (1 − e)^(1/strength)`. Against a basic attacker (strength 0.6) a control works better, and against an APT (1.7) it works clearly worse.
 - An attacker can also **fail or give up on their own** at each stage (basic 20 %, advanced 8 %, APT 2 %). So an attack does not always get through, even against an undefended system: roughly 40 % of attacks on a startup with no controls fail.
 - An attack that is stopped early does almost no damage. The further it gets, the higher the investigation and clean-up costs.
-- If every stage is passed, there is a full breach. Detecting controls (SIEM, EDR) can halve the damage, and recovery controls (backups, incident response plan) reduce it further.
+- **Outcomes are graded, not just "stopped or breached":**
+  - A stage that the controls did not stop is not necessarily lost. The controls still limit the attack's reach (for example, segmentation stops ransomware from encrypting the whole network).
+  - The severity of a breach varies randomly (50–100 % of the worst case).
+  - What matters is *how fast* the attack is detected. Detection within hours reduces the damage by 30–70 %, while detection only after weeks reduces it by almost nothing.
+  - Recovery controls (backups, incident response plan) reduce the damage further.
+- The result is placed on a five-level scale: *Torjuttu* (stopped) → *Pieni häiriö* (minor disruption) → *Hallittu tietoturvaloukkaus* (contained breach) → *Vakava tietoturvaloukkaus* (serious breach) → *Katastrofi* (catastrophe). The results screen breaks the damage down step by step, so you can see how much each factor affected it.
 - The risk profile computes the **expected loss** analytically against the organisation's actual threat landscape, weighted by the probability of each scenario and attacker level, and compares it with the situation without any controls.
 
 Typical outcomes (share of attacks that lead to a breach):

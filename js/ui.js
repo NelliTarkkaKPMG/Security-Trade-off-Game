@@ -20,6 +20,7 @@
       : Math.round(k).toLocaleString("fi-FI") + " k€";
   const pct = (p) => Math.round(p * 100) + " %";
   const names = (ids) => ids.map((id) => controlMap[id].short).join(", ");
+  const pips = (n) => "●".repeat(n) + "○".repeat(3 - n);
 
   function el(tag, cls, text) {
     const node = document.createElement(tag);
@@ -50,16 +51,25 @@
         .map((r) => r.scenario.name)
         .join(", ");
 
+      const facts = el("dl", "facts");
+      for (const [term, value] of [
+        ["Jo käytössä", names(d.owned)],
+        ["Yleisimmät uhat", topThreats],
+        ["Sääntely", d.regulation]
+      ]) {
+        const row = el("div");
+        row.append(el("dt", null, term), el("dd", null, value));
+        facts.append(row);
+      }
+
       const btn = el("button", "difficulty");
       btn.type = "button";
       btn.append(
-        el("span", "difficulty-icon", d.icon),
         el("strong", null, d.name),
-        el("span", "muted small", d.sector),
+        el("span", "difficulty-sector", d.sector),
         el("span", "difficulty-desc", d.desc),
-        el("span", "difficulty-row", "Jo käytössä: " + names(d.owned)),
-        el("span", "difficulty-row", "Yleisimmät uhat: " + topThreats),
-        el("span", "difficulty-budget", "Lisäbudjetti " + money(d.budget) + " · " + d.regulation)
+        facts,
+        el("span", "difficulty-budget", "Lisäbudjetti " + money(d.budget))
       );
       btn.addEventListener("click", () => startGame(d));
       list.append(btn);
@@ -69,7 +79,7 @@
   function startGame(difficulty) {
     state.difficulty = difficulty;
     state.selected = new Set();
-    $("org-name").textContent = "· " + difficulty.name;
+    $("org-name").textContent = difficulty.name + " · " + difficulty.sector;
     renderControls();
     show("build");
   }
@@ -84,32 +94,33 @@
     const ordered = [...data.controls].sort((a, b) => d.owned.includes(b.id) - d.owned.includes(a.id));
     for (const c of ordered) {
       const isOwned = d.owned.includes(c.id);
-      const card = el("button", "control-card" + (isOwned ? " owned" : ""));
-      card.type = "button";
-      card.dataset.id = c.id;
-      if (isOwned) card.disabled = true;
+      const row = el("button", "control-row" + (isOwned ? " owned" : ""));
+      row.type = "button";
+      row.dataset.id = c.id;
+      if (isOwned) row.disabled = true;
 
-      const head = el("div", "control-head");
-      head.append(el("span", "control-icon", c.icon), el("span", "tag tag-" + c.category, c.category));
-
-      const badges = el("div", "control-badges");
-      if (isOwned) badges.append(el("span", "badge badge-owned", "Jo käytössä"));
+      const name = el("div", "control-name", c.name);
       if (d.required.includes(c.id)) {
-        const b = el("span", "badge badge-required", "Laki edellyttää");
-        b.title = d.regulation + " edellyttää tätä";
-        badges.append(b);
+        const law = el("span", "law-mark", "§");
+        law.title = d.regulation + " edellyttää tätä";
+        name.append(law);
       }
+      name.append(el("span", "pips inline", pips(c.friction)));
+      const text = el("div");
+      text.append(name, el("div", "control-desc", c.desc));
 
-      const meta = el("div", "control-meta");
-      meta.append(el("span", "cost", isOwned ? "" : money(c.cost)));
-      const friction = el("span", "friction-dots");
-      friction.title = "Hankaloittaa työntekoa: " + c.friction;
-      friction.textContent = c.friction ? "😤".repeat(c.friction) : "";
-      meta.append(friction);
+      const friction = el("span", "pips", pips(c.friction));
+      friction.title = "Hankaloittaa työtä: " + c.friction + "/3";
 
-      card.append(head, el("h3", null, c.name), badges, el("p", "muted", c.desc), meta);
-      if (!isOwned) card.addEventListener("click", () => toggleControl(c.id));
-      grid.append(card);
+      row.append(
+        el("span", "box", isOwned ? "✓" : ""),
+        text,
+        el("span", "control-cat", c.category),
+        friction,
+        el("span", "control-price", isOwned ? "Käytössä" : money(c.cost))
+      );
+      if (!isOwned) row.addEventListener("click", () => toggleControl(c.id));
+      grid.append(row);
     }
     updateBuild();
   }
@@ -138,15 +149,15 @@
     frictionFill.style.width = Math.min(100, (friction / (data.frictionLimit * 2)) * 100) + "%";
     frictionFill.classList.toggle("over", friction > data.frictionLimit);
     $("friction-value").textContent = friction + " / " + data.frictionLimit;
-    $("friction-note").textContent =
-      mult < 1 ? "· liikaa kerralla: ihmiset kiertävät suojauksia" : "· ihmiset sietävät tämän";
+    $("friction-note").textContent = mult < 1 ? "liikaa – ihmiset alkavat kiertää suojauksia" : "";
 
-    for (const card of document.querySelectorAll(".control-card:not(.owned)")) {
-      const c = controlMap[card.dataset.id];
+    for (const row of document.querySelectorAll(".control-row:not(.owned)")) {
+      const c = controlMap[row.dataset.id];
       const selected = state.selected.has(c.id);
-      card.classList.toggle("selected", selected);
-      card.classList.toggle("unaffordable", !selected && c.cost > left);
-      card.setAttribute("aria-pressed", String(selected));
+      row.classList.toggle("selected", selected);
+      row.classList.toggle("unaffordable", !selected && c.cost > left);
+      row.setAttribute("aria-pressed", String(selected));
+      row.querySelector(".box").textContent = selected ? "✓" : "";
     }
   }
 
@@ -163,14 +174,14 @@
     show("attack");
   }
 
-  function timelineItem(cls, title, text, detailText, outcome) {
+  function timelineItem(cls, status, title, text, detailText, outcome) {
     const li = el("li", "timeline-item " + cls);
     const body = el("div", "timeline-body");
-    body.append(el("h4", null, title));
-    if (text) body.append(el("p", "muted", text));
+    body.append(el("h3", null, title));
+    if (text) body.append(el("p", "timeline-text", text));
     if (detailText) body.append(el("p", "timeline-detail", detailText));
     if (outcome) body.append(el("p", "timeline-outcome", outcome));
-    li.append(el("span", "timeline-dot"), body);
+    li.append(el("span", "status", status), body);
     return li;
   }
 
@@ -183,42 +194,52 @@
     revealTimers.forEach(clearTimeout);
     revealTimers = [];
 
-    $("attack-icon").textContent = r.scenario.icon;
     $("attack-title").textContent = r.scenario.name;
     $("attack-intro").textContent = r.scenario.intro;
-    $("attack-tier").className = "tier-badge tier-" + r.tier.id;
-    $("attack-tier").textContent = r.tier.icon + " Hyökkääjä: " + r.tier.name;
-    $("attack-tier").title = r.tier.desc;
+    const tier = $("attack-tier");
+    tier.replaceChildren(el("strong", null, "Hyökkääjä: " + r.tier.name + ". "), document.createTextNode(r.tier.desc));
     const list = $("attack-timeline");
     list.replaceChildren();
 
     const items = r.stages.map((st, i) => {
       const contained = st.contained >= 0.01;
-      const outcome = st.blocked
-        ? "Pysäytetty."
+      const outcome = st.gaveUp
+        ? r.scenario.giveUpText || "Hyökkääjä epäonnistui ja luovutti."
+        : contained
+          ? "Suojaukset eivät pysäyttäneet, mutta rajasivat vahinkoa."
+          : null;
+      const [cls, status] = st.blocked
+        ? ["blocked", "PYSÄYTETTY"]
         : st.gaveUp
-          ? r.scenario.giveUpText || "Hyökkääjä epäonnistui ja luovutti."
+          ? ["gaveup", "LUOVUTTI"]
           : contained
-            ? "Pääsi läpi, mutta suojaukset rajasivat vahinkoa."
-            : "Pääsi läpi.";
-      const cls = st.blocked ? "blocked" : st.gaveUp ? "gaveup" : contained ? "contained" : "passed";
-      return timelineItem(cls, i + 1 + ". " + st.name, st.text, defenceText(st.contributors, st.p, "Suojana"), outcome);
+            ? ["contained", "RAJATTU"]
+            : ["passed", "LÄPI"];
+      return timelineItem(cls, status, i + 1 + ". " + st.name, st.text, defenceText(st.contributors, st.p, "Suojana"), outcome);
     });
 
     // Vaiheet, joihin hyökkäys ei koskaan edennyt
     for (let i = r.stages.length; i < r.scenario.stages.length; i++) {
-      items.push(timelineItem("skipped", i + 1 + ". " + r.scenario.stages[i].name, "Hyökkäys ei edennyt tänne.", null, null));
+      items.push(timelineItem("skipped", "—", i + 1 + ". " + r.scenario.stages[i].name, "Hyökkäys ei edennyt tänne.", null, null));
     }
 
     if (r.breached) {
       const d = r.detection;
       items.push(
-        timelineItem(d.detected ? "blocked" : "passed", "Havaitseminen", null, defenceText(d.contributors, d.p, "Havaitsijana"), d.text)
+        timelineItem(
+          d.detected ? "blocked" : "passed",
+          d.detected ? "AJOISSA" : "MYÖHÄSSÄ",
+          "Havaitseminen",
+          d.text,
+          defenceText(d.contributors, d.p, "Havaitsijana"),
+          null
+        )
       );
       const rc = r.recovery;
       items.push(
         timelineItem(
           rc.contributors.length ? "blocked" : "passed",
+          rc.contributors.length ? "−" + pct(1 - rc.factor) : "EI APUA",
           "Toipuminen",
           null,
           rc.contributors.length
@@ -256,8 +277,8 @@
   /* ---------- Tulokset ---------- */
 
   function renderResult(r) {
-    $("result-hero").className = "panel result-hero grade-" + r.grade.id;
-    $("result-scenario").textContent = r.scenario.icon + " " + r.scenario.name + " · " + r.tier.name;
+    $("result-hero").className = "verdict grade-" + r.grade.id;
+    $("result-scenario").textContent = r.scenario.name + ", " + r.tier.adjective + " hyökkääjä";
     $("result-title").textContent = r.grade.label;
     $("result-score").textContent = r.score;
 
@@ -341,7 +362,7 @@
     for (const a of additions) {
       const li = el("li");
       li.append(
-        el("strong", null, a.control.icon + " " + a.control.name),
+        el("strong", null, a.control.name),
         document.createTextNode(" · " + money(a.control.cost)),
         el("span", a.affordable ? "hint ok" : "hint", a.affordable ? " – budjetti olisi riittänyt." : " – olisi vaatinut luopumista jostain muusta.")
       );
@@ -361,7 +382,7 @@
     wrap.replaceChildren();
     for (const row of profile.rows.slice(0, 5)) {
       const item = el("div", "risk-row" + (row.scenario.id === state.result.scenario.id ? " current" : ""));
-      const label = el("div", "risk-label", row.scenario.icon + " " + row.scenario.name);
+      const label = el("div", "risk-label", row.scenario.name);
       label.append(el("span", "risk-prob", pct(row.probability) + " hyökkäyksistä"));
       const bar = el("div", "risk-bar");
       const fill = el("div", "risk-fill");

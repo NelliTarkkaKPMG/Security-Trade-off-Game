@@ -26,7 +26,7 @@
       cost: 15,
       friction: 1,
       category: "Estää",
-      desc: "Pelkkä salasana ei riitä kirjautumiseen. Pysäyttää suurimman osan varastetuilla salasanoilla tehdyistä murroista."
+      desc: "Kirjautuminen vaatii salasanan lisäksi esimerkiksi vahvistuksen puhelimella. Varastettu salasana ei yksin riitä murtoon."
     },
     {
       id: "email",
@@ -35,7 +35,7 @@
       cost: 10,
       friction: 0,
       category: "Estää",
-      desc: "Haitalliset liitteet, linkit ja huijausviestit suodatetaan ennen kuin ne päätyvät postilaatikkoon."
+      desc: "Haitalliset liitteet, linkit ja huijausviestit suodatetaan, ennen kuin ne päätyvät postilaatikkoon."
     },
     {
       id: "training",
@@ -44,7 +44,7 @@
       cost: 12,
       friction: 1,
       category: "Estää",
-      desc: "Lyhyitä koulutuksia ja harjoituksia: huijaukset tunnistetaan ja epäilyttävästä ilmoitetaan."
+      desc: "Lyhyet koulutukset ja harjoitukset opettavat tunnistamaan huijaukset ja ilmoittamaan epäilyttävästä."
     },
     {
       id: "verify",
@@ -62,7 +62,7 @@
       cost: 25,
       friction: 0,
       category: "Havaitsee",
-      desc: "Tunnistaa ja pysäyttää haittaohjelmat ja epäilyttävän toiminnan työasemilla ja palvelimilla."
+      desc: "Ohjelmisto tunnistaa ja pysäyttää haittaohjelmat ja epäilyttävän toiminnan työasemilla ja palvelimilla."
     },
     {
       id: "backup",
@@ -71,7 +71,7 @@
       cost: 15,
       friction: 0,
       category: "Toipuu",
-      desc: "Varmuuskopiot, joita hyökkääjä ei pääse muuttamaan tai poistamaan. Ei estä hyökkäystä, mutta nopeuttaa toipumista."
+      desc: "Hyökkääjä ei pääse muuttamaan eikä poistamaan varmuuskopioita. Ne eivät estä hyökkäystä, mutta nopeuttavat toipumista."
     },
     {
       id: "patch",
@@ -80,7 +80,7 @@
       cost: 15,
       friction: 0,
       category: "Estää",
-      desc: "Tunnetut haavoittuvuudet paikataan nopeasti – erityisesti internetiin näkyvät laitteet."
+      desc: "Tunnetut haavoittuvuudet paikataan nopeasti, erityisesti internetiin näkyvissä laitteissa."
     },
     {
       id: "segment",
@@ -98,11 +98,11 @@
       cost: 15,
       friction: 0,
       category: "Estää",
-      desc: "Suodattaa verkkopalveluun kohdistuvat hyökkäykset ja bottiliikenteen."
+      desc: "Palomuuri suodattaa verkkopalveluun kohdistuvat hyökkäykset ja bottiliikenteen."
     },
     {
       id: "siem",
-      name: "Tietoturvavalvonta 24/7",
+      name: "Ympärivuorokautinen valvonta",
       short: "Valvonta",
       cost: 30,
       friction: 0,
@@ -134,7 +134,7 @@
       cost: 18,
       friction: 0,
       category: "Estää",
-      desc: "Pilvipalvelu suodattaa hyökkäysliikenteen ennen kuin se kaataa verkkopalvelun."
+      desc: "Pilvipalvelu suodattaa hyökkäysliikenteen, ennen kuin se kaataa verkkopalvelun."
     },
     {
       id: "irplan",
@@ -143,7 +143,7 @@
       cost: 10,
       friction: 0,
       category: "Toipuu",
-      desc: "Harjoiteltu suunnitelma: kuka päättää, keneen soitetaan ja mitä tehdään ensin. Pienentää kaikkia vahinkoja."
+      desc: "Harjoiteltu suunnitelma kertoo, kuka päättää, keneen soitetaan ja mitä tehdään ensin. Se pienentää kaikkia vahinkoja."
     }
   ];
 
@@ -206,7 +206,7 @@
     {
       id: "enterprise",
       name: "Finanssiyhtiö",
-      sector: "Pankki- ja vakuutuspalvelut, 2 000 henkeä",
+      sector: "Pankki- ja vakuutuspalvelut, 2\u00a0000 henkeä",
       desc: "MFA, valvonta, EDR ja varmuuskopiot ovat jo kunnossa. Heikkoudet: iso IT-tuki, paljon toimittajia ja vanhoja järjestelmiä.",
       budget: 70,
       impactScale: 2,
@@ -242,6 +242,7 @@
     {
       id: "basic",
       name: "Perustaso",
+      adjective: "perustason",
       strength: 0.6,
       giveUp: 0.2,
       impactScale: 0.5,
@@ -250,6 +251,7 @@
     {
       id: "advanced",
       name: "Edistynyt",
+      adjective: "edistynyt",
       strength: 1,
       giveUp: 0.08,
       impactScale: 1,
@@ -258,6 +260,7 @@
     {
       id: "apt",
       name: "Huipputaso",
+      adjective: "huipputason",
       strength: 1.7,
       giveUp: 0.02,
       impactScale: 1.6,
@@ -284,7 +287,7 @@
         },
         {
           name: "Haittaohjelman käynnistys",
-          text: "Liite avataan ja haittaohjelma yrittää käynnistyä työasemalla.",
+          text: "Liite avataan, ja haittaohjelma yrittää käynnistyä työasemalla.",
           prevent: { edr: 0.6, patch: 0.25 }
         },
         {
@@ -294,13 +297,13 @@
         },
         {
           name: "Tiedostojen salaus",
-          text: "Kiristysohjelma käynnistetään kaikilla saavutetuilla koneilla samanaikaisesti.",
+          text: "Kiristyshaittaohjelma käynnistetään samanaikaisesti kaikilla koneilla, joille hyökkääjä on päässyt.",
           prevent: { edr: 0.3 }
         }
       ],
       detect: { siem: 0.6, edr: 0.3 },
       detection: {
-        detected: { text: "Hyökkääjän liikkeet verkossa havaittiin {n} tunnissa, ja koneita ehdittiin eristää ennen kuin salaus levisi kaikkialle.", min: 1, max: 12 },
+        detected: { text: "Hyökkääjän liikkeet verkossa havaittiin {n} tunnissa, ja koneita ehdittiin eristää, ennen kuin salaus levisi kaikkialle.", min: 1, max: 12 },
         undetected: { text: "Hyökkäys huomattiin vasta, kun tiedostot oli jo salattu ja lunnasvaatimus ilmestyi näytöille." }
       },
       recover: { backup: 0.7, irplan: 0.3 },
@@ -376,7 +379,7 @@
       tiers: ["advanced", "apt"],
       name: "Puhelu IT-tukeen",
       impact: 350,
-      intro: "Hyökkääjä soittaa IT-tukeen työntekijänä, jonka puhelin on ”hajonnut”, ja pyytää nollaamaan tämän MFA:n.",
+      intro: "Hyökkääjä soittaa IT-tukeen ja esiintyy työntekijänä, jonka puhelin on muka hajonnut. Hän pyytää nollaamaan työntekijän MFA:n.",
       stages: [
         {
           name: "Tunnusten nollaus puhelimessa",
@@ -400,7 +403,7 @@
         undetected: { text: "Murto paljastui vasta, kun hyökkääjä käynnisti kiristyshaittaohjelman {n} päivän kuluttua.", min: 2, max: 10 }
       },
       recover: { backup: 0.3, irplan: 0.35 },
-      discuss: "Miten IT-tukemme varmistaa soittajan henkilöllisyyden ennen kuin se nollaa salasanan tai MFA:n?"
+      discuss: "Miten IT-tukemme varmistaa soittajan henkilöllisyyden, ennen kuin se nollaa salasanan tai MFA:n?"
     },
     {
       id: "cloud",
@@ -422,7 +425,7 @@
         },
         {
           name: "Tietojen massalataus",
-          text: "Koko asiakastietokanta ladataan ulos muutamassa tunnissa.",
+          text: "Koko asiakastietokanta siirretään hyökkääjälle muutamassa tunnissa.",
           prevent: { siem: 0.35, pam: 0.35 }
         }
       ],
@@ -481,7 +484,7 @@
         },
         {
           name: "Raskaat sivupyynnöt",
-          text: "Raskaita hakuja, jotka näyttävät oikeilta käyttäjiltä.",
+          text: "Raskaita hakuja, jotka näyttävät tavallisten käyttäjien hauilta.",
           prevent: { waf: 0.4, ddos: 0.4 }
         }
       ],
@@ -491,7 +494,7 @@
         undetected: { text: "Palvelunesto tunnistettiin vasta {n} tunnin kuluttua – siihen asti vikaa etsittiin omista palvelimista.", min: 2, max: 8 }
       },
       recover: { irplan: 0.5 },
-      discuss: "Kuinka paljon meille maksaa tunti, jolloin verkkopalvelu on alhaalla? Kuka päättää, mitä silloin tehdään?"
+      discuss: "Kuinka paljon meille maksaa tunti, jolloin verkkopalvelu ei toimi? Kuka päättää, mitä silloin tehdään?"
     },
     {
       id: "insider",
@@ -580,7 +583,7 @@
         undetected: { text: "Tunnukset suljettiin vasta, kun myyntipäällikkö ilmoitti laitteen kadonneeksi {n} päivän kuluttua.", min: 1, max: 3 }
       },
       recover: { irplan: 0.3 },
-      discuss: "Tietääkö jokainen meillä, kenelle ilmoitetaan heti, jos läppäri tai puhelin katoaa?"
+      discuss: "Tietääkö jokainen meillä, kenelle ilmoitetaan heti, jos kannettava tietokone tai puhelin katoaa?"
     },
     {
       id: "vpn",

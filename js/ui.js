@@ -17,9 +17,11 @@
   const money = (k) =>
     k >= 1000
       ? (k / 1000).toLocaleString("fi-FI", { maximumFractionDigits: 2 }) + " M€"
-      : Math.round(k).toLocaleString("fi-FI") + " k€";
-  const pct = (p) => Math.round(p * 100) + " %";
-  const names = (ids) => ids.map((id) => controlMap[id].short).join(", ");
+      : Math.round(k).toLocaleString("fi-FI") + "\u00a0k€";
+  const pct = (p) => Math.round(p * 100) + "\u00a0%";
+  // Kaksoispisteen jälkeinen luettelo pienellä alkukirjaimella; lyhenteet (MFA, EDR, DDoS-suojaus) ennallaan.
+  const lowerFirst = (word) => (/^[A-ZÅÄÖ][a-zåäö]/.test(word) ? word[0].toLowerCase() + word.slice(1) : word);
+  const nameList = (ids) => ids.map((id) => lowerFirst(controlMap[id].short)).join(", ");
 
   // Pelin oma SVG-kuvake (js/icons.js). Sisältö on staattista, omaa koodia.
   function icon(name, cls) {
@@ -97,8 +99,8 @@
         el("strong", null, d.name),
         el("span", "muted small", d.sector),
         el("span", "difficulty-desc", d.desc),
-        el("span", "difficulty-row", "Jo käytössä: " + names(d.owned)),
-        el("span", "difficulty-row", "Yleisimmät uhat: " + topThreats),
+        el("span", "difficulty-row", "Jo käytössä: " + nameList(d.owned)),
+        el("span", "difficulty-row", "Yleisimmät uhat: " + topThreats.split(", ").map(lowerFirst).join(", ")),
         el("span", "difficulty-budget", "Lisäbudjetti " + money(d.budget) + " · " + d.regulation)
       );
       btn.addEventListener("click", () => startGame(d));
@@ -220,7 +222,7 @@
 
   function defenceText(contributors, p, label, none = "Ei suojausta tässä vaiheessa.") {
     if (!contributors.length) return none;
-    return label + ": " + names(contributors.map((c) => c.id)) + " (" + pct(p) + ")";
+    return label + ": " + nameList(contributors.map((c) => c.id)) + " (" + pct(p) + ")";
   }
 
   function renderAttack(r) {
@@ -231,7 +233,7 @@
     $("attack-title").textContent = r.scenario.name;
     $("attack-intro").textContent = r.scenario.intro;
     $("attack-tier").className = "tier-badge tier-" + r.tier.id;
-    $("attack-tier").textContent = "Hyökkääjä: " + r.tier.name;
+    $("attack-tier").textContent = "Hyökkääjä: " + r.tier.name.toLowerCase();
     $("attack-tier").title = r.tier.desc;
     const list = $("attack-timeline");
     list.replaceChildren();
@@ -266,7 +268,7 @@
           "Toipuminen",
           null,
           rc.contributors.length
-            ? "Apuna: " + names(rc.contributors.map((c) => c.id)) + " – vahingot −" + pct(1 - rc.factor)
+            ? "Apuna: " + nameList(rc.contributors.map((c) => c.id)) + " – vahingot −" + pct(1 - rc.factor)
             : "Ei varmuuskopioita tai suunnitelmaa, joista olisi apua.",
           null
         )
@@ -339,7 +341,7 @@
 
   function renderResult(r) {
     $("result-hero").className = "panel result-hero grade-" + r.grade.id;
-    $("result-scenario").textContent = r.scenario.name + " · " + r.tier.name;
+    $("result-scenario").textContent = r.scenario.name + ", " + r.tier.adjective + " hyökkääjä";
     $("result-title").textContent = r.grade.label;
     countUp($("result-score"), r.score);
     const gauge = $("gauge-fill");
@@ -352,11 +354,11 @@
 
     let summary;
     if (r.gaveUp) {
-      summary = (r.scenario.giveUpText || "Hyökkääjä epäonnistui omin avuin.") + " Tällä kertaa kävi tuuri.";
+      summary = (r.scenario.giveUpText || "Hyökkääjä epäonnistui ja luovutti.") + " Tällä kertaa kävi tuuri.";
     } else if (!r.breached && r.blockedAt === 0) {
       summary = "Hyökkäys pysäytettiin heti alussa.";
     } else if (!r.breached) {
-      summary = "Hyökkääjä pääsi vaiheeseen " + (r.blockedAt + 1) + "/" + r.scenario.stages.length + ", mutta pysäytettiin ennen varsinaista vahinkoa.";
+      summary = "Hyökkääjä eteni vaiheeseen " + (r.blockedAt + 1) + "/" + r.scenario.stages.length + ", mutta se pysäytettiin ennen varsinaista vahinkoa.";
     } else {
       summary = r.detection.text;
     }
@@ -444,8 +446,8 @@
     const profile = engine.riskProfile(active(), data, d);
     $("risk-before").textContent = money(profile.undefendedLoss);
     $("risk-after").textContent = money(profile.expectedLoss);
-    $("risk-change").textContent =
-      profile.undefendedLoss > 0 ? "−" + pct(1 - profile.expectedLoss / profile.undefendedLoss) : "";
+    const reduction = profile.undefendedLoss > 0 ? 1 - profile.expectedLoss / profile.undefendedLoss : 0;
+    $("risk-change").textContent = Math.round(reduction * 100) > 0 ? "−" + pct(reduction) : "";
 
     const wrap = $("risk-profile");
     wrap.replaceChildren();
@@ -466,7 +468,7 @@
     const missing = d.required.filter((id) => !active().has(id));
     const note = $("required-note");
     note.hidden = missing.length === 0;
-    note.textContent = missing.length ? d.regulation + " edellyttää myös: " + names(missing) + "." : "";
+    note.textContent = missing.length ? d.regulation + " edellyttää myös: " + nameList(missing) + "." : "";
   }
 
   /* ---------- Tapahtumat ---------- */

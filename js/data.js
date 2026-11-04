@@ -21,8 +21,9 @@
   const controls = [
     {
       id: "mfa",
-      name: "Monivaiheinen tunnistau\u00ADtuminen (MFA)",
+      name: "Monivaiheinen tunnistautuminen (MFA)",
       short: "MFA",
+      icon: "🔐",
       cost: 15,
       friction: 1,
       category: "Estää",
@@ -31,7 +32,8 @@
     {
       id: "email",
       name: "Sähköpostin suodatus",
-      short: "Sähköposti\u00ADsuodatus",
+      short: "Sähköpostisuodatus",
+      icon: "📧",
       cost: 10,
       friction: 0,
       category: "Estää",
@@ -41,6 +43,7 @@
       id: "training",
       name: "Henkilöstön koulutus",
       short: "Koulutus",
+      icon: "🎓",
       cost: 12,
       friction: 1,
       category: "Estää",
@@ -48,8 +51,9 @@
     },
     {
       id: "verify",
-      name: "Varmistus\u00ADkäytännöt",
+      name: "Varmistuskäytännöt",
       short: "Varmistukset",
+      icon: "📞",
       cost: 8,
       friction: 1,
       category: "Estää",
@@ -57,8 +61,9 @@
     },
     {
       id: "edr",
-      name: "Laitteiden suojaus\u00ADohjelmisto (EDR)",
+      name: "Laitteiden suojausohjelmisto (EDR)",
       short: "EDR",
+      icon: "🛡️",
       cost: 25,
       friction: 0,
       category: "Havaitsee",
@@ -68,6 +73,7 @@
       id: "backup",
       name: "Eristetyt varmuuskopiot",
       short: "Varmuuskopiot",
+      icon: "💾",
       cost: 15,
       friction: 0,
       category: "Toipuu",
@@ -77,6 +83,7 @@
       id: "patch",
       name: "Päivitysten hallinta",
       short: "Päivitykset",
+      icon: "🩹",
       cost: 15,
       friction: 0,
       category: "Estää",
@@ -86,6 +93,7 @@
       id: "segment",
       name: "Verkon segmentointi",
       short: "Segmentointi",
+      icon: "🧱",
       cost: 20,
       friction: 1,
       category: "Estää",
@@ -95,6 +103,7 @@
       id: "waf",
       name: "Verkkopalvelun suojaus (WAF)",
       short: "WAF",
+      icon: "🔥",
       cost: 15,
       friction: 0,
       category: "Estää",
@@ -102,8 +111,9 @@
     },
     {
       id: "siem",
-      name: "Tietoturva\u00ADvalvonta 24/7",
+      name: "Tietoturvavalvonta 24/7",
       short: "Valvonta",
+      icon: "📡",
       cost: 30,
       friction: 0,
       category: "Havaitsee",
@@ -111,8 +121,9 @@
     },
     {
       id: "pam",
-      name: "Käyttö\u00ADoikeuksien rajaus",
+      name: "Käyttöoikeuksien rajaus",
       short: "Oikeuksien rajaus",
+      icon: "🗝️",
       cost: 20,
       friction: 2,
       category: "Estää",
@@ -122,6 +133,7 @@
       id: "encryption",
       name: "Levysalaus",
       short: "Levysalaus",
+      icon: "🔒",
       cost: 8,
       friction: 0,
       category: "Estää",
@@ -129,8 +141,9 @@
     },
     {
       id: "ddos",
-      name: "Palvelunesto\u00ADsuojaus",
+      name: "Palvelunestosuojaus",
       short: "DDoS-suojaus",
+      icon: "🌊",
       cost: 18,
       friction: 0,
       category: "Estää",
@@ -138,8 +151,9 @@
     },
     {
       id: "irplan",
-      name: "Häiriötilanne\u00ADsuunnitelma",
-      short: "Häiriö\u00ADsuunnitelma",
+      name: "Häiriötilannesuunnitelma",
+      short: "Häiriösuunnitelma",
+      icon: "📋",
       cost: 10,
       friction: 0,
       category: "Toipuu",
@@ -156,6 +170,7 @@
     {
       id: "startup",
       name: "Ohjelmistostartup",
+      icon: "🚀",
       sector: "SaaS-palvelu, 25 henkeä, kaikki pilvessä",
       desc: "Kasvu on ollut nopeaa: kaikilla on pääkäyttäjäoikeudet, eikä mitään ole sovittu kirjallisesti.",
       budget: 40,
@@ -181,6 +196,7 @@
     {
       id: "sme",
       name: "Teollisuusyritys",
+      icon: "🏭",
       sector: "Valmistaja, 300 henkeä, tehdas ja toimistot",
       desc: "IT:stä vastaa kaksi ihmistä. Etäyhteydet kulkevat vanhan VPN-laitteen kautta, ja tehdas ja toimisto ovat samassa verkossa.",
       budget: 70,
@@ -206,6 +222,7 @@
     {
       id: "enterprise",
       name: "Finanssiyhtiö",
+      icon: "🏦",
       sector: "Pankki- ja vakuutuspalvelut, 2 000 henkeä",
       desc: "MFA, valvonta, EDR ja varmuuskopiot ovat jo kunnossa. Heikkoudet: iso IT-tuki, paljon toimittajia ja vanhoja järjestelmiä.",
       budget: 70,
@@ -242,7 +259,7 @@
     {
       id: "basic",
       name: "Perustaso",
-      adjective: "perustason",
+      icon: "🧢",
       strength: 0.6,
       giveUp: 0.2,
       impactScale: 0.5,
@@ -251,7 +268,7 @@
     {
       id: "advanced",
       name: "Edistynyt",
-      adjective: "edistynyt",
+      icon: "🎯",
       strength: 1,
       giveUp: 0.08,
       impactScale: 1,
@@ -260,7 +277,7 @@
     {
       id: "apt",
       name: "Huipputaso",
-      adjective: "huipputason",
+      icon: "🕶️",
       strength: 1.7,
       giveUp: 0.02,
       impactScale: 1.6,
@@ -277,6 +294,7 @@
       likelihood: 3,
       tiers: ["basic", "advanced", "apt"],
       name: "Kiristyshaittaohjelma",
+      icon: "💀",
       impact: 400,
       intro: "Rikollisryhmä yrittää salata yrityksen tiedostot ja vaatii lunnaita.",
       stages: [
@@ -314,6 +332,7 @@
       likelihood: 3,
       tiers: ["basic", "advanced"],
       name: "Laskutuspetos",
+      icon: "🧾",
       impact: 250,
       intro: "Huijari kaappaa talousosaston sähköpostitilin ja yrittää ohjata toimittajan laskun maksun omalle tililleen.",
       stages: [
@@ -346,6 +365,7 @@
       likelihood: 1,
       tiers: ["basic", "advanced"],
       name: "Deepfake-videopuhelu",
+      icon: "🎥",
       impact: 300,
       intro: "Talousjohtaja kutsutaan videopalaveriin, jossa ”toimitusjohtaja” pyytää kiireellistä maksua. Kasvot ja ääni on väärennetty tekoälyllä.",
       stages: [
@@ -378,6 +398,7 @@
       likelihood: 1.5,
       tiers: ["advanced", "apt"],
       name: "Puhelu IT-tukeen",
+      icon: "☎️",
       impact: 350,
       intro: "Hyökkääjä soittaa IT-tukeen työntekijänä, jonka puhelin on ”hajonnut”, ja pyytää nollaamaan tämän MFA:n.",
       stages: [
@@ -410,6 +431,7 @@
       likelihood: 2,
       tiers: ["basic", "advanced"],
       name: "Pilvipalvelun tilikaappaus",
+      icon: "☁️",
       impact: 300,
       intro: "Työntekijän koneelle tarttuu salasanoja varastava haittaohjelma. Tunnukset myydään rikollisille.",
       stages: [
@@ -442,6 +464,7 @@
       likelihood: 2,
       tiers: ["basic", "advanced", "apt"],
       name: "Verkkopalvelun haavoittuvuus",
+      icon: "🕸️",
       impact: 300,
       intro: "Hyökkääjä etsii aukkoja yrityksen verkkopalvelusta päästäkseen käsiksi asiakastietoihin.",
       stages: [
@@ -474,6 +497,7 @@
       likelihood: 1.5,
       tiers: ["basic", "advanced"],
       name: "Palvelunestohyökkäys",
+      icon: "🌪️",
       impact: 150,
       intro: "Hakkeriaktivistit yrittävät kaataa verkkopalvelun kesken vilkkaimman sesongin.",
       stages: [
@@ -501,6 +525,7 @@
       likelihood: 1,
       tiers: ["basic", "advanced", "apt"],
       name: "Sisäpiirin uhka",
+      icon: "🕴️",
       impact: 280,
       intro: "Irtisanoutuva työntekijä aikoo viedä asiakasrekisterin mukanaan kilpailijalle.",
       stages: [
@@ -533,6 +558,7 @@
       likelihood: 0.5,
       tiers: ["advanced", "apt"],
       name: "Toimitusketjuhyökkäys",
+      icon: "📦",
       impact: 450,
       intro: "Käyttämänne ohjelmiston toimittajaan on murtauduttu, ja sen virallinen päivitys sisältää takaoven. Päivitys on jo asennettu.",
       stages: [
@@ -560,6 +586,7 @@
       likelihood: 2,
       tiers: ["basic"],
       name: "Kadonnut kannettava",
+      icon: "💻",
       impact: 120,
       intro: "Myyntipäällikön kannettava jää junaan. Laite on lukittu, mutta löytäjä yrittää silti päästä käsiksi sen tietoihin.",
       // Useimmiten löytäjä ei ole kiinnostunut tiedoista, vaan laite pyyhitään ja myydään.
@@ -590,6 +617,7 @@
       likelihood: 2,
       tiers: ["basic", "advanced", "apt"],
       name: "Paikkaamaton VPN-laite",
+      icon: "🚪",
       impact: 350,
       intro: "VPN-laitteesta on julkaistu kriittinen haavoittuvuus – ja hyökkääjät skannaavat koko internetiä.",
       stages: [

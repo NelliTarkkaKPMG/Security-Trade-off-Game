@@ -41,7 +41,7 @@ The numbers are simplified, teaching-level estimates. They are not real risk mea
 
 ## Running it
 
-No build step and no dependencies. Fonts (Source Serif 4, IBM Plex Sans) load from Google Fonts. Without a network connection, the page falls back to system fonts. Open `index.html` in a browser, or serve the folder as a static site (for example with GitHub Pages):
+No build step and no dependencies. Fonts (Chakra Petch, Barlow, JetBrains Mono) load from Google Fonts. Without a network connection, the page falls back to system fonts. Open `index.html` in a browser, or serve the folder as a static site (for example with GitHub Pages):
 
 ```bash
 npm start   # local server at http://localhost:8080

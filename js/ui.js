@@ -185,8 +185,8 @@
     return li;
   }
 
-  function defenceText(contributors, p, label) {
-    if (!contributors.length) return "Ei suojausta tässä vaiheessa.";
+  function defenceText(contributors, p, label, none = "Ei suojausta tässä vaiheessa.") {
+    if (!contributors.length) return none;
     return label + ": " + names(contributors.map((c) => c.id)) + " (" + pct(p) + ")";
   }
 
@@ -231,7 +231,7 @@
           d.detected ? "AJOISSA" : "MYÖHÄSSÄ",
           "Havaitseminen",
           d.text,
-          defenceText(d.contributors, d.p, "Havaitsijana"),
+          defenceText(d.contributors, d.p, "Havaitsijana", "Kukaan ei ollut valvomassa."),
           null
         )
       );

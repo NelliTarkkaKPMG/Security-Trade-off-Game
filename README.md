@@ -4,6 +4,15 @@ An awareness and discussion game about security controls, risk and limited resou
 
 You are a company's new security lead. You get an **extra budget** and choose which security controls to invest in. **The money isn't enough for everything.** Then the company is attacked. The attack is drawn based on what realistically threatens *this kind* of company. The game shows what happened, what would have helped most, and a question for the team to discuss.
 
+## Office map
+
+The company is drawn as an office floor plan seen from above: lobby, mail room, web shop, remote access, open office, finance, IT help desk, server room, security operations room and crisis room, plus the internet, the cloud and the city outside.
+
+- Each control has a physical place in the office (email filtering in the mail room, backups in the server room's vault, monitoring in the security operations room, verification procedures in finance and IT support). A chosen control appears in its room on the map.
+- The attacker walks through the building along the attack's stages (e.g. ransomware: mail room → open office → server room). A room flashes green (stopped), yellow (contained) or red (got through). The security operations room lights up at the detection stage.
+
+Room positions are in `rooms` in `js/data.js`. Each stage's room is in its `room` field, and each control's rooms are in its `rooms` field.
+
 ## Companies
 
 Each company has a realistic starting point: it already has some controls, it has a known weakness, and it has its own threat landscape.

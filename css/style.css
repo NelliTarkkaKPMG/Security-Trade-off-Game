@@ -403,3 +403,140 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* ---------- Toimiston kartta (pohjapiirros ylhäältä) ---------- */
+
+.map-scroll { margin: 8px 0 28px; border-radius: 16px; }
+.map {
+  --wall: #3a352e;
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #cfc8b8;
+  box-shadow: var(--shadow);
+}
+
+.room {
+  position: absolute;
+  padding: 8px;
+  color: #2b2722;
+  box-shadow: inset 0 0 0 3px var(--wall);
+  transition: box-shadow 0.2s;
+}
+.room::after { content: ""; position: absolute; inset: 0; background: transparent; transition: background-color 0.35s; pointer-events: none; }
+.room.outside { box-shadow: none; }
+
+.room-name {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+}
+.name-short { display: none; }
+.room-props { position: absolute; z-index: 1; left: 8px; right: 8px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.prop {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  background: #fff;
+  border: 2px solid var(--wall);
+  border-radius: 50%;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.prop.owned { background: #e3efe5; border-style: dashed; }
+.prop.new { animation: pop 0.35s ease-out; }
+@keyframes pop { from { transform: scale(0.2); } 70% { transform: scale(1.2); } to { transform: scale(1); } }
+
+/* Lattiat */
+.room-aula { background-color: #ebe6dc; background-image: conic-gradient(#ddd5c6 25%, transparent 0 50%, #ddd5c6 0 75%, transparent 0); background-size: 26px 26px; }
+.room-posti { background-color: #d8b88a; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 24px); }
+.room-kauppa { background-color: #f1e3c6; background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 18px); }
+.room-vpn { background-color: #c8c7c1; background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1.5px); background-size: 10px 10px; }
+.room-konttori { background-color: #b8c6d4; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
+.room-talous { background-color: #c89a69; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 30px); }
+.room-ittuki { background-color: #c3d0bd; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
+.room-palvelin { background-color: #98a1ab; background-image: linear-gradient(rgba(0, 0, 0, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.14) 1px, transparent 1px); background-size: 22px 22px; }
+.room-valvomo { background-color: #34425a; color: #e8eef8; }
+.room-valvomo .room-name { background: rgba(0, 0, 0, 0.35); color: #e8eef8; }
+.room-kriisi { background-color: #d9c4a5; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 26px); }
+.room-internet { background-color: #20242b; background-image: radial-gradient(rgba(120, 200, 255, 0.25) 1px, transparent 1.5px); background-size: 14px 14px; }
+.room-internet .room-name { background: rgba(0, 0, 0, 0.5); color: #cfe8ff; }
+.room-pilvi { background-color: #a9d5f5; background-image: radial-gradient(circle at 30% 60%, #fff 0 18%, transparent 19%), radial-gradient(circle at 55% 50%, #fff 0 22%, transparent 23%), radial-gradient(circle at 75% 62%, #fff 0 16%, transparent 17%); }
+.room-kaupunki { background-color: #8c9095; background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 8px, transparent 8px 18px); background-size: 100% 14px; background-repeat: no-repeat; background-position: 0 60%; }
+
+/* Korostus, kun korttia osoitetaan */
+.room.hl { box-shadow: inset 0 0 0 3px var(--wall), inset 0 0 0 7px var(--accent); }
+.room.outside.hl { box-shadow: inset 0 0 0 4px var(--accent); }
+
+/* Hyökkäyksen välähdykset */
+.room.flash-ok::after { background: rgba(46, 160, 90, 0.38); }
+.room.flash-bad::after { background: rgba(220, 50, 50, 0.38); }
+.room.flash-warn::after { background: rgba(240, 170, 40, 0.4); }
+.room.flash-gave::after { background: rgba(120, 120, 120, 0.35); }
+
+.attacker-token {
+  position: absolute;
+  z-index: 5;
+  font-size: 32px;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease-in-out, top 0.6s ease-in-out;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45));
+}
+.attacker-token.stopped { filter: grayscale(1) drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45)); }
+.bubble {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 8px;
+  border: 2px solid #222;
+  background: #fff;
+  color: #222;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.bubble.show { opacity: 1; }
+.bubble-ok { background: #d6f5df; }
+.bubble-bad { background: #ffd9d6; }
+.bubble-warn { background: #ffecc2; }
+.bubble-gave { background: #e6e6e6; }
+
+/* Hyökkäysnäkymä: kartta ja tapahtumat rinnakkain */
+.attack-stage { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.attack-stage .map-scroll { margin: 0; position: sticky; top: 12px; }
+.attack-stage .timeline { max-height: none; }
+
+/* Rakennusnäkymä: kartta pysyy näkyvissä korttien vieressä */
+.build-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.build-layout .map-scroll { position: sticky; top: 140px; margin: 0; }
+.build-layout .control-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+@media (max-width: 1000px) {
+  .attack-stage, .build-layout { grid-template-columns: 1fr; }
+  .attack-stage .map-scroll { position: static; }
+  .build-layout .map-scroll { position: static; margin-bottom: 16px; }
+}
+
+@media (max-width: 600px) {
+  .room { padding: 4px; }
+  .room-name { font-size: 0.58rem; padding: 0 4px; }
+  .name-full { display: none; }
+  .name-short { display: inline; }
+  .attack-stage .map-scroll { position: sticky; top: 6px; z-index: 6; }
+  .room-props { left: 4px; right: 4px; bottom: 4px; gap: 2px; }
+  .prop { width: 20px; height: 20px; font-size: 11px; border-width: 1.5px; }
+  .attacker-token { font-size: 22px; }
+  .bubble { font-size: 10px; padding: 1px 6px; }
+}

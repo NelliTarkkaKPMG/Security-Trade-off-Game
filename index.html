@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Security Trade-off Game</title>
   <meta name="description" content="Rakenna mahdollisimman turvallinen järjestelmä rajallisella budjetilla – ja katso, miten valintasi kestävät satunnaisen hyökkäyksen.">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
   <header class="topbar">
@@ -52,9 +52,12 @@
         </div>
       </div>
 
-      <h2 id="build-title" class="section-title">Valitse suojaukset</h2>
-      <p class="muted section-sub">Klikkaa korttia valitaksesi sen. Harmaisiin budjetti ei enää riitä.</p>
-      <div id="control-grid" class="control-grid"></div>
+      <h2 id="build-title" class="section-title">Varusta toimisto</h2>
+      <p class="muted section-sub">Valitse suojaukset korteista – ne ilmestyvät toimistoon omiin huoneisiinsa. Harmaisiin budjetti ei enää riitä.</p>
+      <div class="build-layout">
+        <div class="map-scroll"><div id="build-map"></div></div>
+        <div id="control-grid" class="control-grid"></div>
+      </div>
     </section>
 
     <!-- Hyökkäys -->
@@ -69,7 +72,10 @@
             <p><span id="attack-tier" class="tier-badge"></span></p>
           </div>
         </div>
-        <ol id="attack-timeline" class="timeline"></ol>
+        <div class="attack-stage">
+          <div class="map-scroll"><div id="attack-map"></div></div>
+          <ol id="attack-timeline" class="timeline"></ol>
+        </div>
         <div class="attack-actions">
           <button id="btn-skip" class="btn btn-ghost" type="button">Ohita animaatio</button>
           <button id="btn-results" class="btn btn-primary" type="button" hidden>Näytä tulokset →</button>
@@ -131,8 +137,8 @@
     Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
   </footer>
 
-  <script src="js/data.js?v=12"></script>
-  <script src="js/engine.js?v=12"></script>
-  <script src="js/ui.js?v=12"></script>
+  <script src="js/data.js?v=15"></script>
+  <script src="js/engine.js?v=15"></script>
+  <script src="js/ui.js?v=15"></script>
 </body>
 </html>

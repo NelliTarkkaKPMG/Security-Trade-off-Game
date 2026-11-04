@@ -3,6 +3,7 @@
   const data = window.GameData;
   const engine = window.GameEngine;
   const controlMap = Object.fromEntries(data.controls.map((c) => [c.id, c]));
+  const roomMap = Object.fromEntries(data.rooms.map((r) => [r.id, r]));
 
   const state = {
     difficulty: null,
@@ -13,6 +14,7 @@
   const $ = (id) => document.getElementById(id);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let revealTimers = [];
+  let lastToggled = null; // juuri valittu suojaus saa kartalla pienen ilmestymisanimaation
 
   const money = (k) =>
     k >= 1000
@@ -74,9 +76,56 @@
     show("build");
   }
 
+  /* ---------- Toimiston kartta ---------- */
+
+  function buildMap(container) {
+    container.replaceChildren();
+    const map = el("div", "map");
+    for (const r of data.rooms) {
+      const room = el("div", "room room-" + r.id + (r.outside ? " outside" : ""));
+      room.dataset.room = r.id;
+      Object.assign(room.style, { left: r.x + "%", top: r.y + "%", width: r.w + "%", height: r.h + "%" });
+      const label = el("span", "room-name");
+      label.append(el("span", "name-full", r.name), el("span", "name-short", r.short));
+      room.append(label, el("div", "room-props"));
+      map.append(room);
+    }
+    container.append(map);
+    return map;
+  }
+
+  // Näyttää käytössä olevat suojaukset esineinä omissa huoneissaan.
+  function placeProps(map) {
+    const set = active();
+    for (const room of map.querySelectorAll(".room")) {
+      const props = room.querySelector(".room-props");
+      props.replaceChildren();
+      for (const c of data.controls) {
+        if (!set.has(c.id) || !c.rooms.includes(room.dataset.room)) continue;
+        const prop = el("span", "prop" + (owned().includes(c.id) ? " owned" : "") + (c.id === lastToggled ? " new" : ""), c.icon);
+        prop.title = c.name + (owned().includes(c.id) ? " (jo käytössä)" : "");
+        props.append(prop);
+      }
+    }
+  }
+
+  function highlightRooms(map, roomIds) {
+    for (const room of map.querySelectorAll(".room")) room.classList.toggle("hl", roomIds.includes(room.dataset.room));
+  }
+
+  // Huoneen keskipiste prosentteina; offset siirtää hahmoa, jos huoneessa käydään uudelleen.
+  function roomCenter(id, offset = 0) {
+    const r = roomMap[id];
+    // Toistuvat käynnit samassa huoneessa vuorotellen vasemmalle ja oikealle.
+    const shift = offset === 0 ? 0 : (offset % 2 ? -1 : 1) * Math.min(r.w / 4, 3);
+    return { left: r.x + r.w / 2 + shift + "%", top: r.y + r.h / 2 + "%" };
+  }
+
   /* ---------- Rakennus ---------- */
 
   function renderControls() {
+    lastToggled = null;
+    state.buildMap = buildMap($("build-map"));
     const grid = $("control-grid");
     grid.replaceChildren();
     const d = state.difficulty;
@@ -109,6 +158,8 @@
 
       card.append(head, el("h3", null, c.name), badges, el("p", "muted", c.desc), meta);
       if (!isOwned) card.addEventListener("click", () => toggleControl(c.id));
+      card.addEventListener("mouseenter", () => highlightRooms(state.buildMap, c.rooms));
+      card.addEventListener("mouseleave", () => highlightRooms(state.buildMap, []));
       grid.append(card);
     }
     updateBuild();
@@ -121,10 +172,12 @@
       if (controlMap[id].cost > budgetLeft()) return;
       state.selected.add(id);
     }
+    lastToggled = state.selected.has(id) ? id : null;
     updateBuild();
   }
 
   function updateBuild() {
+    placeProps(state.buildMap);
     const budget = state.difficulty.budget;
     const left = budgetLeft();
     const friction = engine.totalFriction(active(), data.controls);
@@ -229,6 +282,56 @@
       );
     }
 
+    items.forEach((li) => list.append(li));
+
+    // Kartta: hyökkääjä kulkee vaiheiden huoneiden läpi.
+    lastToggled = null;
+    const map = buildMap($("attack-map"));
+    placeProps(map);
+    const token = el("div", "attacker-token", r.scenario.id === "insider" ? "🕴️" : "🕵️");
+    const bubble = el("span", "bubble");
+    token.append(bubble);
+    Object.assign(token.style, roomCenter(r.scenario.start));
+    map.append(token);
+
+    const visits = {};
+    const roomEl = (id) => map.querySelector('[data-room="' + id + '"]');
+    const stageFlash = { blocked: "ok", gaveup: "gave", contained: "warn", passed: "bad" };
+    const stageText = { blocked: "Pysäytetty!", gaveup: "Luovutti", contained: "Rajattu", passed: "Läpi" };
+
+    // Jokainen askel: siirrä hahmo, väläytä huone, näytä tapahtumarivi.
+    const steps = r.stages.map((_, i) => {
+      const cls = items[i].className.replace("timeline-item ", "");
+      const room = r.scenario.stages[i].room;
+      return { li: items[i], move: room, rooms: [room], flash: stageFlash[cls], text: stageText[cls] };
+    });
+    const skipped = items.slice(r.stages.length, r.scenario.stages.length);
+    if (r.breached) {
+      const d = r.detection;
+      const rc = r.recovery;
+      steps.push({ li: items[r.scenario.stages.length], rooms: ["valvomo"], flash: d.detected ? "ok" : "bad", text: d.detected ? "Havaittu" : "Ei havaittu" });
+      const recoveryRooms = [...new Set(rc.contributors.flatMap((c) => controlMap[c.id].rooms))];
+      steps.push({ li: items[r.scenario.stages.length + 1], rooms: recoveryRooms, flash: recoveryRooms.length ? "ok" : null, text: null });
+    }
+
+    const runStep = (step) => {
+      if (step.move) {
+        const n = visits[step.move] || 0;
+        visits[step.move] = n + 1;
+        Object.assign(token.style, roomCenter(step.move, n));
+      }
+      step.li.classList.add("visible");
+      for (const id of step.rooms) {
+        const room = roomEl(id);
+        if (room && step.flash) room.classList.add("flash-" + step.flash);
+      }
+      if (step.text) {
+        bubble.textContent = step.text;
+        bubble.className = "bubble show bubble-" + step.flash;
+      }
+      if (step.flash === "ok" && step.move) token.classList.add("stopped");
+    };
+
     const btnResults = $("btn-results");
     const btnSkip = $("btn-skip");
     btnResults.hidden = true;
@@ -237,19 +340,19 @@
     const finish = () => {
       revealTimers.forEach(clearTimeout);
       revealTimers = [];
-      for (const li of list.children) li.classList.add("visible");
+      steps.forEach(runStep);
+      for (const li of skipped) li.classList.add("visible");
       btnSkip.hidden = true;
       btnResults.hidden = false;
       btnResults.focus();
     };
 
-    items.forEach((li) => list.append(li));
     if (reducedMotion) {
       finish();
       return;
     }
-    items.forEach((li, i) => revealTimers.push(setTimeout(() => li.classList.add("visible"), 300 + i * 1000)));
-    revealTimers.push(setTimeout(finish, 300 + items.length * 1000));
+    steps.forEach((step, i) => revealTimers.push(setTimeout(() => runStep(step), 600 + i * 1300)));
+    revealTimers.push(setTimeout(finish, 600 + steps.length * 1300 + 400));
     btnSkip.onclick = finish;
   }
 

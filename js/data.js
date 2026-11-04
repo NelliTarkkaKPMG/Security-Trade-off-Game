@@ -21,6 +21,7 @@
   const controls = [
     {
       id: "mfa",
+      rooms: ["aula", "pilvi"],
       name: "Monivaiheinen tunnistautuminen (MFA)",
       short: "MFA",
       icon: "🔐",
@@ -31,6 +32,7 @@
     },
     {
       id: "email",
+      rooms: ["posti"],
       name: "Sähköpostin suodatus",
       short: "Sähköpostisuodatus",
       icon: "📧",
@@ -41,6 +43,7 @@
     },
     {
       id: "training",
+      rooms: ["konttori"],
       name: "Henkilöstön koulutus",
       short: "Koulutus",
       icon: "🎓",
@@ -51,6 +54,7 @@
     },
     {
       id: "verify",
+      rooms: ["talous", "ittuki"],
       name: "Varmistuskäytännöt",
       short: "Varmistukset",
       icon: "📞",
@@ -61,6 +65,7 @@
     },
     {
       id: "edr",
+      rooms: ["konttori"],
       name: "Laitteiden suojausohjelmisto (EDR)",
       short: "EDR",
       icon: "🛡️",
@@ -71,6 +76,7 @@
     },
     {
       id: "backup",
+      rooms: ["palvelin"],
       name: "Eristetyt varmuuskopiot",
       short: "Varmuuskopiot",
       icon: "💾",
@@ -81,6 +87,7 @@
     },
     {
       id: "patch",
+      rooms: ["vpn", "kauppa"],
       name: "Päivitysten hallinta",
       short: "Päivitykset",
       icon: "🩹",
@@ -91,6 +98,7 @@
     },
     {
       id: "segment",
+      rooms: ["palvelin"],
       name: "Verkon segmentointi",
       short: "Segmentointi",
       icon: "🧱",
@@ -101,6 +109,7 @@
     },
     {
       id: "waf",
+      rooms: ["kauppa"],
       name: "Verkkopalvelun suojaus (WAF)",
       short: "WAF",
       icon: "🔥",
@@ -111,6 +120,7 @@
     },
     {
       id: "siem",
+      rooms: ["valvomo"],
       name: "Tietoturvavalvonta 24/7",
       short: "Valvonta",
       icon: "📡",
@@ -121,6 +131,7 @@
     },
     {
       id: "pam",
+      rooms: ["palvelin"],
       name: "Käyttöoikeuksien rajaus",
       short: "Oikeuksien rajaus",
       icon: "🗝️",
@@ -131,6 +142,7 @@
     },
     {
       id: "encryption",
+      rooms: ["konttori"],
       name: "Levysalaus",
       short: "Levysalaus",
       icon: "🔒",
@@ -141,6 +153,7 @@
     },
     {
       id: "ddos",
+      rooms: ["kauppa"],
       name: "Palvelunestosuojaus",
       short: "DDoS-suojaus",
       icon: "🌊",
@@ -151,6 +164,7 @@
     },
     {
       id: "irplan",
+      rooms: ["kriisi"],
       name: "Häiriötilannesuunnitelma",
       short: "Häiriösuunnitelma",
       icon: "📋",
@@ -285,6 +299,26 @@
     }
   ];
 
+  /*
+   * Toimiston pohjapiirros ylhäältä. Sijainnit ja koot ovat prosentteja kartasta.
+   * outside = rakennuksen ulkopuolella.
+   */
+  const rooms = [
+    { id: "internet", name: "Internet", short: "Netti", x: 0, y: 0, w: 13, h: 100, outside: true },
+    { id: "aula", name: "Aula", short: "Aula", x: 13, y: 0, w: 18, h: 36 },
+    { id: "posti", name: "Postihuone", short: "Posti", x: 31, y: 0, w: 16, h: 36 },
+    { id: "kauppa", name: "Verkkokauppa", short: "Kauppa", x: 47, y: 0, w: 19, h: 36 },
+    { id: "vpn", name: "Etäyhteydet", short: "VPN", x: 66, y: 0, w: 18, h: 36 },
+    { id: "konttori", name: "Avokonttori", short: "Konttori", x: 13, y: 36, w: 43, h: 32 },
+    { id: "talous", name: "Talous", short: "Talous", x: 56, y: 36, w: 28, h: 32 },
+    { id: "ittuki", name: "IT-tuki", short: "IT-tuki", x: 13, y: 68, w: 17, h: 32 },
+    { id: "palvelin", name: "Palvelinhuone", short: "Palvelimet", x: 30, y: 68, w: 26, h: 32 },
+    { id: "valvomo", name: "Valvomo", short: "Valvomo", x: 56, y: 68, w: 14, h: 32 },
+    { id: "kriisi", name: "Kriisihuone", short: "Kriisi", x: 70, y: 68, w: 14, h: 32 },
+    { id: "pilvi", name: "Pilvi", short: "Pilvi", x: 84, y: 0, w: 16, h: 50, outside: true },
+    { id: "kaupunki", name: "Kaupungilla", short: "Kaupunki", x: 84, y: 50, w: 16, h: 50, outside: true }
+  ];
+
   // Käyttäjäkitkan raja: tämän ylittyessä käyttäjät alkavat kiertää kontrolleja.
   const frictionLimit = 4;
 
@@ -297,25 +331,30 @@
       icon: "💀",
       impact: 400,
       intro: "Rikollisryhmä yrittää salata yrityksen tiedostot ja vaatii lunnaita.",
+      start: "internet",
       stages: [
         {
           name: "Tietojenkalastelusähköposti",
           text: "Kirjanpitäjä saa laskuksi naamioidun viestin, jonka liitteessä on haittaohjelma.",
+          room: "posti",
           prevent: { email: 0.5, training: 0.35 }
         },
         {
           name: "Haittaohjelman käynnistys",
           text: "Liite avataan ja haittaohjelma yrittää käynnistyä työasemalla.",
+          room: "konttori",
           prevent: { edr: 0.6, patch: 0.25 }
         },
         {
           name: "Leviäminen verkossa",
           text: "Hyökkääjä etsii pääkäyttäjätunnuksia ja leviää palvelimille.",
+          room: "palvelin",
           prevent: { segment: 0.5, pam: 0.4, mfa: 0.2 }
         },
         {
           name: "Tiedostojen salaus",
           text: "Kiristysohjelma käynnistetään kaikilla saavutetuilla koneilla samanaikaisesti.",
+          room: "palvelin",
           prevent: { edr: 0.3 }
         }
       ],
@@ -335,20 +374,24 @@
       icon: "🧾",
       impact: 250,
       intro: "Huijari kaappaa talousosaston sähköpostitilin ja yrittää ohjata toimittajan laskun maksun omalle tililleen.",
+      start: "internet",
       stages: [
         {
           name: "Tunnusten kalastelu",
           text: "Talousjohtaja saa viestin, jonka linkki vie aidolta näyttävälle Microsoft 365 -kirjautumissivulle.",
+          room: "posti",
           prevent: { email: 0.45, training: 0.35 }
         },
         {
           name: "Sähköpostitilin kaappaus",
           text: "Huijari yrittää kirjautua talousjohtajan tilille kalastellulla salasanalla.",
+          room: "talous",
           prevent: { mfa: 0.75 }
         },
         {
           name: "Maksuohjeen muutos",
           text: "Kaapatulta tililtä vastataan aitoon laskuketjuun ja pyydetään maksamaan uudelle tilinumerolle.",
+          room: "talous",
           prevent: { verify: 0.7, training: 0.3 }
         }
       ],
@@ -368,20 +411,24 @@
       icon: "🎥",
       impact: 300,
       intro: "Talousjohtaja kutsutaan videopalaveriin, jossa ”toimitusjohtaja” pyytää kiireellistä maksua. Kasvot ja ääni on väärennetty tekoälyllä.",
+      start: "internet",
       stages: [
         {
           name: "Kutsu salaiseen palaveriin",
           text: "Viesti tulee toimitusjohtajan nimissä: ”luottamuksellinen yrityskauppa, älä kerro kenellekään”.",
+          room: "posti",
           prevent: { email: 0.3, training: 0.3 }
         },
         {
           name: "Väärennetty videopuhelu",
           text: "Puhelussa ovat tutut kasvot ja ääni. Pyyntö: kaksi maksua vielä tänään.",
+          room: "talous",
           prevent: { training: 0.35, verify: 0.6 }
         },
         {
           name: "Maksun hyväksyntä",
           text: "Maksu menee läpi, jos yksi ihminen voi hyväksyä sen yksin.",
+          room: "talous",
           prevent: { verify: 0.6 }
         }
       ],
@@ -401,20 +448,24 @@
       icon: "☎️",
       impact: 350,
       intro: "Hyökkääjä soittaa IT-tukeen työntekijänä, jonka puhelin on ”hajonnut”, ja pyytää nollaamaan tämän MFA:n.",
+      start: "internet",
       stages: [
         {
           name: "Tunnusten nollaus puhelimessa",
           text: "Soittaja tietää nimen, tittelin ja esihenkilön – kaikki löytyvät LinkedInistä.",
+          room: "ittuki",
           prevent: { verify: 0.7, training: 0.25 }
         },
         {
           name: "Oman MFA-laitteen lisääminen",
           text: "Hyökkääjä kirjautuu nollatuilla tunnuksilla ja rekisteröi oman puhelimensa. MFA ei auta, koska se on juuri nollattu.",
+          room: "aula",
           prevent: { siem: 0.35 }
         },
         {
           name: "Pääsy järjestelmiin",
           text: "Työntekijän oikeuksilla haetaan tietoja ja etsitään pääkäyttäjätunnuksia.",
+          room: "palvelin",
           prevent: { pam: 0.45, segment: 0.3, edr: 0.2 }
         }
       ],
@@ -434,20 +485,24 @@
       icon: "☁️",
       impact: 300,
       intro: "Työntekijän koneelle tarttuu salasanoja varastava haittaohjelma. Tunnukset myydään rikollisille.",
+      start: "internet",
       stages: [
         {
           name: "Salasanojen varkaus",
           text: "Ilmaiseksi ladattu ohjelma kopioi selaimeen tallennetut salasanat ja kirjautumiset.",
+          room: "konttori",
           prevent: { edr: 0.5, training: 0.2 }
         },
         {
           name: "Kirjautuminen pilvipalveluun",
           text: "Ostetuilla tunnuksilla kirjaudutaan asiakastiedot sisältävään pilvipalveluun. Joskus mukana on myös valmis kirjautumisistunto.",
+          room: "pilvi",
           prevent: { mfa: 0.65 }
         },
         {
           name: "Tietojen massalataus",
           text: "Koko asiakastietokanta ladataan ulos muutamassa tunnissa.",
+          room: "pilvi",
           prevent: { siem: 0.35, pam: 0.35 }
         }
       ],
@@ -467,20 +522,24 @@
       icon: "🕸️",
       impact: 300,
       intro: "Hyökkääjä etsii aukkoja yrityksen verkkopalvelusta päästäkseen käsiksi asiakastietoihin.",
+      start: "internet",
       stages: [
         {
           name: "Haavoittuvuuksien etsintä",
           text: "Automaattinen skanneri käy läpi verkkopalvelun sivut ja lomakkeet.",
+          room: "kauppa",
           prevent: { waf: 0.4, patch: 0.3 }
         },
         {
           name: "Haavoittuvuuden hyväksikäyttö",
           text: "Hakukentän kautta syötetään tietokantakomentoja.",
+          room: "kauppa",
           prevent: { waf: 0.5, patch: 0.3 }
         },
         {
           name: "Asiakastietojen kopiointi",
           text: "Palvelun kautta luetaan asiakkaiden yhteystiedot ja salasanatiivisteet.",
+          room: "palvelin",
           prevent: { pam: 0.4, waf: 0.2, siem: 0.2 }
         }
       ],
@@ -500,15 +559,18 @@
       icon: "🌪️",
       impact: 150,
       intro: "Hakkeriaktivistit yrittävät kaataa verkkopalvelun kesken vilkkaimman sesongin.",
+      start: "internet",
       stages: [
         {
           name: "Liikennetulva",
           text: "Kymmeniä gigabittejä roskaliikennettä sekunnissa.",
+          room: "kauppa",
           prevent: { ddos: 0.85, waf: 0.2 }
         },
         {
           name: "Raskaat sivupyynnöt",
           text: "Raskaita hakuja, jotka näyttävät oikeilta käyttäjiltä.",
+          room: "kauppa",
           prevent: { waf: 0.4, ddos: 0.4 }
         }
       ],
@@ -528,20 +590,24 @@
       icon: "🕴️",
       impact: 280,
       intro: "Irtisanoutuva työntekijä aikoo viedä asiakasrekisterin mukanaan kilpailijalle.",
+      start: "konttori",
       stages: [
         {
           name: "Liian laajat oikeudet",
           text: "Työntekijälle on vuosien varrella kertynyt pääsy lähes kaikkeen.",
+          room: "konttori",
           prevent: { pam: 0.6, segment: 0.2 }
         },
         {
           name: "Tietojen keruu",
           text: "Asiakasrekisteri ja tarjoukset ladataan omalle koneelle.",
+          room: "palvelin",
           prevent: { siem: 0.35 }
         },
         {
           name: "Tietojen vienti ulos",
           text: "Tiedostot lähetetään yksityiseen sähköpostiin ja kopioidaan USB-tikulle.",
+          room: "konttori",
           prevent: { edr: 0.3, siem: 0.3, email: 0.15 }
         }
       ],
@@ -561,15 +627,18 @@
       icon: "📦",
       impact: 450,
       intro: "Käyttämänne ohjelmiston toimittajaan on murtauduttu, ja sen virallinen päivitys sisältää takaoven. Päivitys on jo asennettu.",
+      start: "internet",
       stages: [
         {
           name: "Takaoven herääminen",
           text: "Viikkojen hiljaiselon jälkeen takaovi alkaa tutkia ympäristöä.",
+          room: "palvelin",
           prevent: { edr: 0.35, segment: 0.25 }
         },
         {
           name: "Yhteys hyökkääjälle",
           text: "Takaovi ottaa yhteyttä hyökkääjän palvelimeen ja odottaa käskyjä.",
+          room: "internet",
           prevent: { segment: 0.35, siem: 0.35 }
         }
       ],
@@ -592,15 +661,18 @@
       // Useimmiten löytäjä ei ole kiinnostunut tiedoista, vaan laite pyyhitään ja myydään.
       giveUp: 0.5,
       giveUpText: "Löytäjä ei ollut kiinnostunut tiedoista – laite pyyhittiin ja myytiin eteenpäin.",
+      start: "kaupunki",
       stages: [
         {
           name: "Lukituksen ohittaminen",
           text: "Kirjautumissalasana ei suojaa levyä: löytäjä irrottaa levyn tai käynnistää koneen USB-tikulta ja lukee tiedostot suoraan.",
+          room: "kaupunki",
           prevent: { encryption: 0.9 }
         },
         {
           name: "Kirjautuminen pilvipalveluihin",
           text: "Levyltä löytyy selaimeen tallennettuja salasanoja, joilla yritetään kirjautua yrityksen sähköpostiin ja pilvipalveluihin.",
+          room: "pilvi",
           prevent: { mfa: 0.8 }
         }
       ],
@@ -620,20 +692,24 @@
       icon: "🚪",
       impact: 350,
       intro: "VPN-laitteesta on julkaistu kriittinen haavoittuvuus – ja hyökkääjät skannaavat koko internetiä.",
+      start: "internet",
       stages: [
         {
           name: "Haavoittuvuuden hyväksikäyttö",
           text: "Automaattinen työkalu löytää yrityksen VPN-laitteen ja kokeilee julkaistua hyökkäyskoodia.",
+          room: "vpn",
           prevent: { patch: 0.7 }
         },
         {
           name: "Tunnusten keruu",
           text: "Hyökkääjä kerää laitteelta VPN-käyttäjien salasanoja.",
+          room: "vpn",
           prevent: { mfa: 0.5 }
         },
         {
           name: "Pääsy sisäverkkoon",
           text: "VPN-laitteelta siirrytään sisäverkon palvelimille.",
+          room: "palvelin",
           prevent: { segment: 0.5, pam: 0.3, edr: 0.3 }
         }
       ],
@@ -647,7 +723,7 @@
     }
   ];
 
-  const data = { controls, difficulties, attackerTiers, scenarios, frictionLimit };
+  const data = { controls, difficulties, attackerTiers, scenarios, rooms, frictionLimit };
 
   if (typeof module === "object" && module.exports) {
     module.exports = data;

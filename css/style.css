@@ -127,7 +127,9 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .difficulty:hover { border-color: var(--accent); transform: translateY(-2px); }
 .difficulty-icon { font-size: 2rem; }
 .difficulty strong { font-size: 1.15rem; }
-.difficulty-budget { color: var(--accent); font-weight: 600; }
+.difficulty-budget { color: var(--accent); font-weight: 600; margin-top: 6px; }
+.difficulty-desc { font-size: 0.9rem; margin: 4px 0; }
+.difficulty-row { font-size: 0.82rem; color: var(--muted); }
 
 /* ---------- Tilapalkki ---------- */
 
@@ -210,11 +212,17 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   background: var(--panel-2);
   color: var(--muted);
 }
-.tag-Suojaa { color: var(--accent); }
-.tag-Havaitse { color: var(--warn); }
-.tag-Reagoi { color: var(--danger); }
-.tag-Palauta { color: var(--ok); }
-.tag-Tunnista { color: #b38cff; }
+.tag-Estää { color: var(--accent); }
+.tag-Havaitsee { color: var(--warn); }
+.tag-Toipuu { color: var(--ok); }
+
+.control-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.control-badges:empty { display: none; }
+.badge { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; border: 1px solid; }
+.badge-owned { color: var(--ok); border-color: var(--ok); }
+.badge-required { color: var(--warn); border-color: var(--warn); }
+.control-card.owned { cursor: default; border-style: dashed; background: var(--panel-2); }
+.control-card.owned:hover { transform: none; border-color: var(--border); }
 
 /* ---------- Hyökkäys ---------- */
 
@@ -268,7 +276,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .timeline-item.blocked .timeline-body { border-left-color: var(--ok); }
 .timeline-body h4 { font-size: 1rem; }
 .timeline-body p { margin-bottom: 4px; font-size: 0.9rem; }
-.timeline-detail { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem !important; }
+.timeline-detail { font-size: 0.85rem !important; }
 .timeline-outcome { font-weight: 700; margin: 6px 0 0 !important; }
 
 .attack-actions, .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
@@ -277,12 +285,11 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 .result-hero {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   gap: 20px;
   align-items: center;
   border-width: 2px;
 }
-.result-emoji { font-size: 3.5rem; }
 .result-hero h2 { font-size: 1.8rem; }
 .grade-blocked, .grade-minor, .grade-lucky { border-color: var(--ok); }
 .grade-moderate { border-color: var(--warn); }
@@ -294,6 +301,13 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .grade-critical h2 { color: var(--danger); }
 
 .score { text-align: center; }
+
+.discuss { border-left: 4px solid var(--accent); }
+.discuss-question { font-size: 1.15rem; font-weight: 600; margin: 0; }
+.risk-summary { font-size: 1.05rem; }
+.risk-summary strong { color: var(--accent); font-size: 1.3rem; }
+.risk-change { color: var(--ok); font-weight: 700; }
+.required-note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--warn); color: var(--warn); font-weight: 600; }
 
 .grade-scale { grid-column: 1 / -1; padding: 4px 0 18px; }
 .grade-track { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
@@ -340,23 +354,12 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .hint { color: var(--muted); }
 .hint.ok { color: var(--ok); }
 
-.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0 16px; }
-.stat { background: var(--panel-2); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; }
-.stat span { font-size: 0.8rem; color: var(--muted); }
-.stat strong { font-size: 1.4rem; color: var(--accent); }
-.stat strong.muted { color: var(--muted); }
 .risk-prob { display: block; font-size: 0.75rem; color: var(--muted); }
 
 /* Hyökkääjätasot */
 .tier-basic { --tier: var(--ok); }
 .tier-advanced { --tier: var(--warn); }
 .tier-apt { --tier: var(--danger); }
-.tier-mix { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.78rem; }
-.tier-mix-label { color: var(--muted); font-weight: 600; }
-.tier-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--panel); }
-.tier-seg { background: var(--tier); }
-.tier-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); }
-.tier-key::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tier); margin-right: 4px; }
 .tier-badge {
   display: inline-block;
   font-size: 0.85rem;
@@ -371,7 +374,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .risk-profile { display: grid; gap: 8px; }
 .risk-row {
   display: grid;
-  grid-template-columns: 220px 1fr 130px;
+  grid-template-columns: 240px 1fr 90px;
   gap: 12px;
   align-items: center;
   padding: 4px 8px;
@@ -386,9 +389,6 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .risk-fill.high { background: var(--danger); }
 .risk-value { font-size: 0.85rem; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-.chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { background: var(--panel-2); border: 1px solid var(--border); border-radius: 99px; padding: 4px 12px; font-size: 0.88rem; }
-.chip-muted { color: var(--muted); border-style: dashed; }
 
 /* ---------- Mobiili ---------- */
 
@@ -399,7 +399,6 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .result-grid { grid-template-columns: 1fr; gap: 0; }
   .risk-row { grid-template-columns: 1fr; gap: 4px; }
   .risk-value { text-align: left; }
-  .stat-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -114,11 +114,11 @@
 
   // Lopputuloksen asteikko. max = vahinko-osuuden yläraja kullekin tasolle.
   const GRADES = [
-    { id: "blocked", max: 0, label: "Torjuttu", emoji: "🏆" },
-    { id: "minor", max: 0.1, label: "Pieni häiriö", short: "Pieni", emoji: "✅" },
-    { id: "moderate", max: 0.25, label: "Hallittu tietoturvaloukkaus", short: "Hallittu", emoji: "🟡" },
-    { id: "major", max: 0.5, label: "Vakava tietoturvaloukkaus", short: "Vakava", emoji: "⚠️" },
-    { id: "critical", max: 1, label: "Katastrofi", short: "Katastrofi", emoji: "🔥" }
+    { id: "blocked", max: 0, label: "Torjuttu" },
+    { id: "minor", max: 0.1, label: "Pieni häiriö", short: "Pieni" },
+    { id: "moderate", max: 0.25, label: "Hallittu tietoturvaloukkaus", short: "Hallittu" },
+    { id: "major", max: 0.5, label: "Vakava tietoturvaloukkaus", short: "Vakava" },
+    { id: "critical", max: 1, label: "Katastrofi", short: "Katastrofi" }
   ];
 
   function grade(ratio) {
@@ -139,13 +139,17 @@
    * todennäköisyyksineen. Todennäköisyydet summautuvat yhteen.
    */
   function threatDistribution(difficulty, data) {
+    // Skenaarion yleisyys tälle yritykselle (oletuskerroin 1, 0 = ei koske yritystä).
+    const multipliers = difficulty.scenarioWeights || {};
+    const weight = (s) => s.likelihood * (multipliers[s.id] ?? 1);
     const tierMap = byId(data.attackerTiers);
     const threats = [];
     for (const [tierId, tierWeight] of Object.entries(difficulty.tierWeights)) {
-      const pool = data.scenarios.filter((s) => s.tiers.includes(tierId));
-      const total = pool.reduce((a, s) => a + s.likelihood, 0);
+      const pool = data.scenarios.filter((s) => s.tiers.includes(tierId) && weight(s) > 0);
+      const total = pool.reduce((a, s) => a + weight(s), 0);
+      if (total === 0) continue;
       for (const s of pool) {
-        threats.push({ scenario: s, tier: tierMap[tierId], probability: (tierWeight * s.likelihood) / total });
+        threats.push({ scenario: s, tier: tierMap[tierId], probability: (tierWeight * weight(s)) / total });
       }
     }
     const sum = threats.reduce((a, t) => a + t.probability, 0);
@@ -228,7 +232,7 @@
       ratio,
       score: Math.round(100 * (1 - ratio)),
       grade: !breached && stages[blockedAt].gaveUp && ratio < GRADES[1].max
-        ? { id: "lucky", label: "Hyökkäys epäonnistui", emoji: "🍀" }
+        ? { id: "lucky", label: "Hyökkäys epäonnistui" }
         : grade(ratio),
       friction,
       multiplier
@@ -266,7 +270,8 @@
   /**
    * Riskiprofiili organisaation todellista uhkakuvaa vastaan: jokaiselle
    * skenaariolle sen todennäköisyys ja odotettu vahinko (painotettuna
-   * hyökkääjätasojen todennäköisyyksillä).
+   * hyökkääjätasojen todennäköisyyksillä). undefendedLoss on lähtötilanne:
+   * vain yrityksen jo omistamat kontrollit.
    */
   function riskProfile(selected, data, difficulty) {
     const threats = threatDistribution(difficulty, data);
@@ -277,7 +282,7 @@
     for (const t of threats) {
       const opts = { impactScale: difficulty.impactScale, tier: t.tier };
       const e = expectedLoss(t.scenario, selected, data, opts);
-      const none = expectedLoss(t.scenario, [], data, opts);
+      const none = expectedLoss(t.scenario, difficulty.owned || [], data, opts);
       const row = (rowsById[t.scenario.id] ||= { scenario: t.scenario, probability: 0, loss: 0, impact: 0, breach: 0 });
       row.probability += t.probability;
       row.loss += t.probability * e.loss;
@@ -310,17 +315,16 @@
    * Kuinka paljon kunkin valitsematta jätetyn kontrollin lisääminen olisi
    * pienentänyt odotettua vahinkoa tätä uhkaa vastaan.
    */
-  function bestAdditions(scenario, selected, data, opts, budget) {
+  function bestAdditions(scenario, selected, data, opts, budgetLeft) {
     const set = toSet(selected);
     const base = expectedLoss(scenario, set, data, opts).loss;
-    const left = budget - totalCost(set, data.controls);
     return data.controls
       .filter((c) => !set.has(c.id))
       .map((c) => {
         const withC = new Set(set);
         withC.add(c.id);
         const loss = expectedLoss(scenario, withC, data, opts).loss;
-        return { control: c, reduction: base - loss, affordable: c.cost <= left };
+        return { control: c, reduction: base - loss, affordable: c.cost <= budgetLeft };
       })
       .filter((r) => r.reduction > 0.005)
       .sort((a, b) => b.reduction - a.reduction);

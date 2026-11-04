@@ -28,9 +28,11 @@ test("every control is useful in at least one scenario", () => {
   for (const c of data.controls) assert.ok(used.has(c.id), `${c.id} is never used`);
 });
 
-test("no budget can buy every control", () => {
-  const all = engine.totalCost(data.controls.map((c) => c.id), data.controls);
-  for (const d of data.difficulties) assert.ok(d.budget < all / 1.5, d.id);
+test("no company can buy every control it does not already have", () => {
+  for (const d of data.difficulties) {
+    const buyable = data.controls.filter((c) => !d.owned.includes(c.id)).map((c) => c.id);
+    assert.ok(d.budget < engine.totalCost(buyable, data.controls) / 1.5, d.id);
+  }
 });
 
 test("combine uses 1 - Π(1 - p)", () => {
@@ -259,13 +261,50 @@ test("controls only appear where they can actually help", () => {
   // Disk encryption does not stop data read through a running application or by a logged-in user.
   assert.ok(!prevents("webapp").includes("encryption"));
   assert.ok(!prevents("insider").includes("encryption"));
-  // Customer accounts are not protected by employee privilege management.
-  assert.ok(!prevents("stuffing").includes("pam"));
+  // A help desk that resets MFA makes MFA useless for that attack.
+  assert.ok(!prevents("helpdesk").includes("mfa"));
   // EDR / allowlisting cannot be installed on a VPN appliance.
   const vpnDevice = data.scenarios.find((s) => s.id === "vpn").stages.slice(0, 2).flatMap((st) => Object.keys(st.prevent));
   assert.ok(!vpnDevice.includes("edr") && !vpnDevice.includes("allowlist"));
   // Backups cannot undo stolen data.
-  for (const id of ["webapp", "insider", "stuffing", "bec", "laptop"]) {
+  for (const id of ["webapp", "insider", "cloud", "bec", "deepfake", "laptop"]) {
     assert.ok(!("backup" in data.scenarios.find((s) => s.id === id).recover), id);
   }
+});
+
+test("company profiles are consistent", () => {
+  const ids = new Set(data.controls.map((c) => c.id));
+  for (const d of data.difficulties) {
+    for (const id of [...d.owned, ...d.required]) assert.ok(ids.has(id), `${d.id}: ${id}`);
+    for (const id of Object.keys(d.scenarioWeights)) assert.ok(data.scenarios.some((s) => s.id === id), `${d.id}: ${id}`);
+    assert.ok(d.sector && d.desc && d.regulation, d.id);
+  }
+});
+
+test("a company only faces threats that make sense for it", () => {
+  const ids = (id) => new Set(engine.threatDistribution(difficulty(id), data).map((t) => t.scenario.id));
+  // A cloud-only startup has no VPN appliance and no help desk.
+  assert.ok(!ids("startup").has("vpn") && !ids("startup").has("helpdesk"));
+  assert.ok(ids("sme").has("vpn"));
+  assert.ok(ids("enterprise").has("helpdesk"));
+});
+
+test("risk baseline is what the company already owns", () => {
+  const d = difficulty("enterprise");
+  const owned = engine.riskProfile(d.owned, data, d);
+  assert.ok(Math.abs(owned.undefendedLoss - owned.expectedLoss) < 1e-9);
+  assert.ok(owned.undefendedLoss < engine.riskProfile([], data, d).expectedLoss);
+});
+
+test("verification procedures are the key control against social engineering", () => {
+  for (const id of ["helpdesk", "deepfake"]) {
+    const s = data.scenarios.find((x) => x.id === id);
+    const opts = { tier: tier("advanced") };
+    const best = engine.bestAdditions(s, [], data, opts, 100)[0];
+    assert.equal(best.control.id, "verify", id);
+  }
+});
+
+test("every scenario has a discussion question", () => {
+  for (const s of data.scenarios) assert.ok(s.discuss && s.discuss.endsWith("?"), s.id);
 });

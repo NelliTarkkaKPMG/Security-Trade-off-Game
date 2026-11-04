@@ -21,6 +21,13 @@
   const pct = (p) => Math.round(p * 100) + " %";
   const names = (ids) => ids.map((id) => controlMap[id].short).join(", ");
 
+  // Pelin oma SVG-kuvake (js/icons.js). Sisältö on staattista, omaa koodia.
+  function icon(name, cls) {
+    const span = el("span", "icon" + (cls ? " " + cls : ""));
+    span.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + window.GameIcons[name] + "</svg>";
+    return span;
+  }
+
   function el(tag, cls, text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -53,7 +60,7 @@
       const btn = el("button", "difficulty");
       btn.type = "button";
       btn.append(
-        el("span", "difficulty-icon", d.icon),
+        icon("c-" + d.id, "difficulty-icon"),
         el("strong", null, d.name),
         el("span", "muted small", d.sector),
         el("span", "difficulty-desc", d.desc),
@@ -90,7 +97,7 @@
       if (isOwned) card.disabled = true;
 
       const head = el("div", "control-head");
-      head.append(el("span", "control-icon", c.icon), el("span", "tag tag-" + c.category, c.category));
+      head.append(icon(c.id, "control-icon"), el("span", "tag tag-" + c.category, c.category));
 
       const badges = el("div", "control-badges");
       if (isOwned) badges.append(el("span", "badge badge-owned", "Jo käytössä"));
@@ -104,7 +111,7 @@
       meta.append(el("span", "cost", isOwned ? "" : money(c.cost)));
       const friction = el("span", "friction-dots");
       friction.title = "Hankaloittaa työntekoa: " + c.friction;
-      friction.textContent = c.friction ? "😤".repeat(c.friction) : "";
+      friction.textContent = "●".repeat(c.friction) + "○".repeat(3 - c.friction);
       meta.append(friction);
 
       card.append(head, el("h3", null, c.name), badges, el("p", "muted", c.desc), meta);
@@ -183,11 +190,11 @@
     revealTimers.forEach(clearTimeout);
     revealTimers = [];
 
-    $("attack-icon").textContent = r.scenario.icon;
+    $("attack-icon").replaceChildren(icon("s-" + r.scenario.id));
     $("attack-title").textContent = r.scenario.name;
     $("attack-intro").textContent = r.scenario.intro;
     $("attack-tier").className = "tier-badge tier-" + r.tier.id;
-    $("attack-tier").textContent = r.tier.icon + " Hyökkääjä: " + r.tier.name;
+    $("attack-tier").textContent = "Hyökkääjä: " + r.tier.name;
     $("attack-tier").title = r.tier.desc;
     const list = $("attack-timeline");
     list.replaceChildren();
@@ -257,7 +264,7 @@
 
   function renderResult(r) {
     $("result-hero").className = "panel result-hero grade-" + r.grade.id;
-    $("result-scenario").textContent = r.scenario.icon + " " + r.scenario.name + " · " + r.tier.name;
+    $("result-scenario").textContent = r.scenario.name + " · " + r.tier.name;
     $("result-title").textContent = r.grade.label;
     $("result-score").textContent = r.score;
 
@@ -341,7 +348,8 @@
     for (const a of additions) {
       const li = el("li");
       li.append(
-        el("strong", null, a.control.icon + " " + a.control.name),
+        icon(a.control.id, "inline"),
+        el("strong", null, a.control.name),
         document.createTextNode(" · " + money(a.control.cost)),
         el("span", a.affordable ? "hint ok" : "hint", a.affordable ? " – budjetti olisi riittänyt." : " – olisi vaatinut luopumista jostain muusta.")
       );
@@ -361,7 +369,8 @@
     wrap.replaceChildren();
     for (const row of profile.rows.slice(0, 5)) {
       const item = el("div", "risk-row" + (row.scenario.id === state.result.scenario.id ? " current" : ""));
-      const label = el("div", "risk-label", row.scenario.icon + " " + row.scenario.name);
+      const label = el("div", "risk-label");
+      label.append(icon("s-" + row.scenario.id, "inline"), document.createTextNode(row.scenario.name));
       label.append(el("span", "risk-prob", pct(row.probability) + " hyökkäyksistä"));
       const bar = el("div", "risk-bar");
       const fill = el("div", "risk-fill");

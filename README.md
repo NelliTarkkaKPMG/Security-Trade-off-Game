@@ -41,7 +41,7 @@ The numbers are simplified, teaching-level estimates. They are not real risk mea
 
 ## Running it
 
-No build step and no dependencies. Fonts (Barlow Semi Condensed, Source Sans 3) load from Google Fonts. Without a network connection, the page falls back to system fonts. Open `index.html` in a browser, or serve the folder as a static site (for example with GitHub Pages):
+No build step and no dependencies. Fonts (Archivo, Schibsted Grotesk) load from Google Fonts. Without a network connection, the page falls back to system fonts. Open `index.html` in a browser, or serve the folder as a static site (for example with GitHub Pages):
 
 ```bash
 npm start   # local server at http://localhost:8080
@@ -64,6 +64,7 @@ The tests check the game logic and the realism rules (for example, a control onl
 | `index.html` | Game screens |
 | `css/style.css` | Styles (light and dark themes, mobile layout) |
 | `js/data.js` | Controls, companies, attacker levels and scenarios |
+| `js/icons.js` | The game's own SVG icon set (controls, scenarios, companies) |
 | `js/engine.js` | Attack simulation, expected loss, recommendations |
 | `js/ui.js` | User interface |
 | `tests/engine.test.js` | Tests |

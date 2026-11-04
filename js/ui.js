@@ -71,7 +71,7 @@
   function startGame(difficulty) {
     state.difficulty = difficulty;
     state.selected = new Set();
-    $("org-name").textContent = "· " + difficulty.name;
+    $("org-name").textContent = difficulty.name;
     renderControls();
     show("build");
   }
@@ -133,30 +133,28 @@
     const ordered = [...data.controls].sort((a, b) => d.owned.includes(b.id) - d.owned.includes(a.id));
     for (const c of ordered) {
       const isOwned = d.owned.includes(c.id);
-      const card = el("button", "control-card" + (isOwned ? " owned" : ""));
+      const card = el("button", "tile cat-" + c.category + (isOwned ? " owned" : ""));
       card.type = "button";
       card.dataset.id = c.id;
       if (isOwned) card.disabled = true;
 
-      const head = el("div", "control-head");
-      head.append(el("span", "control-icon", c.icon), el("span", "tag tag-" + c.category, c.category));
-
-      const badges = el("div", "control-badges");
-      if (isOwned) badges.append(el("span", "badge badge-owned", "Jo käytössä"));
+      const top = el("span", "tile-top");
+      top.append(el("span", "tile-name", c.name));
       if (d.required.includes(c.id)) {
-        const b = el("span", "badge badge-required", "Laki edellyttää");
-        b.title = d.regulation + " edellyttää tätä";
-        badges.append(b);
+        const law = el("span", "tile-law", "§");
+        law.title = d.regulation + " edellyttää tätä";
+        top.append(law);
       }
+      const body = el("span", "tile-body");
+      body.append(top, el("span", "tile-desc", c.desc));
 
-      const meta = el("div", "control-meta");
-      meta.append(el("span", "cost", isOwned ? "" : money(c.cost)));
-      const friction = el("span", "friction-dots");
-      friction.title = "Hankaloittaa työntekoa: " + c.friction;
-      friction.textContent = c.friction ? "😤".repeat(c.friction) : "";
-      meta.append(friction);
+      const side = el("span", "tile-side");
+      side.append(el("span", "tile-price", isOwned ? "Käytössä" : money(c.cost)));
+      const friction = el("span", "tile-pips", "●".repeat(c.friction) + "○".repeat(3 - c.friction));
+      friction.title = "Hankaloittaa työntekoa: " + c.friction + "/3";
+      side.append(friction);
 
-      card.append(head, el("h3", null, c.name), badges, el("p", "muted", c.desc), meta);
+      card.append(el("span", "tile-icon", c.icon), body, side);
       if (!isOwned) card.addEventListener("click", () => toggleControl(c.id));
       card.addEventListener("mouseenter", () => highlightRooms(state.buildMap, c.rooms));
       card.addEventListener("mouseleave", () => highlightRooms(state.buildMap, []));
@@ -194,7 +192,7 @@
     $("friction-note").textContent =
       mult < 1 ? "· liikaa kerralla: ihmiset kiertävät suojauksia" : "· ihmiset sietävät tämän";
 
-    for (const card of document.querySelectorAll(".control-card:not(.owned)")) {
+    for (const card of document.querySelectorAll(".tile:not(.owned)")) {
       const c = controlMap[card.dataset.id];
       const selected = state.selected.has(c.id);
       card.classList.toggle("selected", selected);
@@ -491,6 +489,12 @@
     show("build");
   });
   $("btn-restart").addEventListener("click", () => show("intro"));
+
+  // Aloitusruudun esikatselu: tyhjä toimisto ja hyökkääjä odottamassa internetissä.
+  const preview = buildMap($("intro-map"));
+  const lurker = el("div", "attacker-token idle", "🕵️");
+  Object.assign(lurker.style, roomCenter("internet"));
+  preview.append(lurker);
 
   renderDifficulties();
   show("intro");

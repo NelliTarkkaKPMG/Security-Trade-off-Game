@@ -3,83 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Security Trade-off Game</title>
-  <meta name="description" content="Rakenna mahdollisimman turvallinen järjestelmä rajallisella budjetilla – ja katso, miten valintasi kestävät satunnaisen hyökkäyksen.">
-  <link rel="stylesheet" href="css/style.css?v=15">
+  <title>Build the Most Secure System</title>
+  <meta name="description" content="Tietoturvan kompromissipeli: varusta toimisto rajallisella budjetilla ja katso, miten suojaukset kestävät hyökkäyksen.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=17">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-icon" aria-hidden="true">🛡️</span>
-      <div>
-        <h1>Build the Most Secure System</h1>
-        <p class="tagline">Tietoturva, riskit ja resurssit tasapainossa</p>
-      </div>
+    <div class="wrap topbar-inner">
+      <span class="logo"><span class="logo-mark" aria-hidden="true"></span>Build the Most Secure System</span>
+      <span class="logo-sub">Tietoturvan kompromissipeli</span>
     </div>
   </header>
 
-  <main id="app">
+  <main id="app" class="wrap">
     <!-- Aloitus -->
     <section id="screen-intro" class="screen" aria-labelledby="intro-title">
-      <div class="panel intro">
-        <h2 id="intro-title">Olet yrityksen uusi tietoturvavastaava</h2>
-        <p>Saat lisäbudjetin tietoturvaan. Valitse, mihin panostat – <strong>kaikkeen raha ei riitä</strong>.</p>
-        <ul class="rules">
-          <li><span class="rule-icon" aria-hidden="true">💶</span><div>Jokainen suojaus maksaa. Osa on yrityksellä jo valmiiksi.</div></li>
-          <li><span class="rule-icon" aria-hidden="true">😤</span><div>Osa suojauksista hankaloittaa työtä. Liikaa kerralla, ja ihmiset alkavat kiertää niitä.</div></li>
-          <li><span class="rule-icon" aria-hidden="true">🎲</span><div>Lopuksi yritykseen hyökätään. Hyökkäys arvotaan sen mukaan, mikä juuri tällaista yritystä oikeasti uhkaa.</div></li>
-        </ul>
-        <h3>Valitse yritys</h3>
-        <div id="difficulty-list" class="difficulty-list"></div>
+      <div class="intro-hero">
+        <div class="intro-text">
+          <h1 id="intro-title">Olet uusi tietoturvavastaava. <span class="accent">Kaikkeen raha ei riitä.</span></h1>
+          <ol class="steps">
+            <li><span><strong>Varusta toimisto.</strong> Jokainen suojaus maksaa, ja osa on yrityksellä jo valmiina.</span></li>
+            <li><span><strong>Älä kuormita ihmisiä.</strong> Liian monta hankaloittavaa suojausta, ja niitä aletaan kiertää.</span></li>
+            <li><span><strong>Kestä hyökkäys.</strong> Hyökkääjä kulkee toimistosi läpi – katso, mihin se pysähtyy.</span></li>
+          </ol>
+        </div>
+        <div class="intro-map" aria-hidden="true"><div id="intro-map"></div></div>
       </div>
+      <h2 class="section-h">Valitse yritys</h2>
+      <div id="difficulty-list" class="companies"></div>
     </section>
 
-    <!-- Kontrollien valinta -->
+    <!-- Suojausten valinta -->
     <section id="screen-build" class="screen" hidden aria-labelledby="build-title">
-      <div class="status-bar panel" aria-live="polite">
-        <div class="status-item">
-          <div class="status-label">Budjetti <span id="org-name" class="muted"></span></div>
+      <div class="hud" aria-live="polite">
+        <div class="hud-org">
+          <span class="hud-label">Yritys</span>
+          <strong id="org-name"></strong>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">Budjettia jäljellä</span>
+          <span class="hud-value"><span id="budget-left"></span> <small>/ <span id="budget-total"></span></small></span>
           <div class="meter"><div id="budget-fill" class="meter-fill"></div></div>
-          <div class="status-value"><span id="budget-left"></span> jäljellä <span class="muted">/ <span id="budget-total"></span></span></div>
         </div>
-        <div class="status-item">
-          <div class="status-label">Työnteon hankaluus</div>
+        <div class="hud-stat">
+          <span class="hud-label">Työnteon hankaluus</span>
+          <span class="hud-value"><span id="friction-value"></span> <small id="friction-note"></small></span>
           <div class="meter"><div id="friction-fill" class="meter-fill friction"></div></div>
-          <div class="status-value"><span id="friction-value"></span> <span id="friction-note" class="muted"></span></div>
         </div>
-        <div class="status-actions">
-          <button id="btn-attack" class="btn btn-danger" type="button">Käynnistä hyökkäys</button>
-        </div>
+        <button id="btn-attack" class="btn btn-go" type="button">Käynnistä hyökkäys</button>
       </div>
 
-      <h2 id="build-title" class="section-title">Varusta toimisto</h2>
-      <p class="muted section-sub">Valitse suojaukset korteista – ne ilmestyvät toimistoon omiin huoneisiinsa. Harmaisiin budjetti ei enää riitä.</p>
       <div class="build-layout">
-        <div class="map-scroll"><div id="build-map"></div></div>
-        <div id="control-grid" class="control-grid"></div>
+        <div class="stage">
+          <div id="build-map"></div>
+          <p class="stage-hint">Valitsemasi suojaukset ilmestyvät huoneisiinsa. Osoita suojausta nähdäksesi, minne se kuuluu.</p>
+        </div>
+        <aside class="shop" aria-labelledby="build-title">
+          <h2 id="build-title" class="shop-title">Suojaukset</h2>
+          <div id="control-grid" class="shop-list"></div>
+        </aside>
       </div>
     </section>
 
     <!-- Hyökkäys -->
     <section id="screen-attack" class="screen" hidden aria-labelledby="attack-title">
-      <div class="panel attack">
-        <div class="attack-head">
-          <span id="attack-icon" class="attack-icon" aria-hidden="true"></span>
-          <div>
-            <p class="eyebrow">Uhkaskenaario</p>
-            <h2 id="attack-title"></h2>
-            <p id="attack-intro" class="muted"></p>
-            <p><span id="attack-tier" class="tier-badge"></span></p>
-          </div>
+      <div class="attack-head">
+        <span id="attack-icon" class="attack-icon" aria-hidden="true"></span>
+        <div>
+          <h1 id="attack-title"></h1>
+          <p id="attack-intro" class="lede"></p>
+          <span id="attack-tier" class="tier-badge"></span>
         </div>
-        <div class="attack-stage">
-          <div class="map-scroll"><div id="attack-map"></div></div>
+      </div>
+      <div class="attack-stage">
+        <div class="stage"><div id="attack-map"></div></div>
+        <aside class="log">
           <ol id="attack-timeline" class="timeline"></ol>
-        </div>
-        <div class="attack-actions">
-          <button id="btn-skip" class="btn btn-ghost" type="button">Ohita animaatio</button>
-          <button id="btn-results" class="btn btn-primary" type="button" hidden>Näytä tulokset →</button>
-        </div>
+          <div class="log-actions">
+            <button id="btn-skip" class="btn btn-ghost" type="button">Näytä kaikki heti</button>
+            <button id="btn-results" class="btn btn-go" type="button" hidden>Näytä tulokset</button>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -87,58 +94,57 @@
     <section id="screen-result" class="screen" hidden aria-labelledby="result-title">
       <div class="panel result-hero" id="result-hero">
         <div>
-          <p class="eyebrow" id="result-scenario"></p>
-          <h2 id="result-title"></h2>
-          <p id="result-summary"></p>
+          <p class="kicker" id="result-scenario"></p>
+          <h1 id="result-title"></h1>
+          <p id="result-summary" class="lede"></p>
         </div>
         <div class="score">
-          <div class="score-value" id="result-score"></div>
-          <div class="score-label">pistettä / 100</div>
+          <span class="score-value" id="result-score"></span>
+          <span class="score-label">/ 100</span>
         </div>
         <div id="grade-scale" class="grade-scale" aria-hidden="true"></div>
       </div>
 
       <div class="panel discuss">
-        <p class="eyebrow">Keskustelkaa</p>
+        <span class="discuss-label">Keskustelkaa</span>
         <p id="discuss" class="discuss-question"></p>
       </div>
 
       <div class="result-grid">
         <div class="panel">
-          <h3>Vahingot</h3>
-          <div class="damage-bar"><div id="damage-fill" class="damage-fill"></div></div>
-          <p><strong id="damage-value"></strong> <span class="muted">/ pahimmillaan <span id="damage-max"></span></span></p>
+          <h2 class="panel-title">Vahingot</h2>
+          <p class="damage-line"><strong id="damage-value"></strong> <span class="muted">pahimmillaan <span id="damage-max"></span></span></p>
+          <div class="meter"><div id="damage-fill" class="meter-fill damage"></div></div>
           <ul id="damage-breakdown" class="plain-list"></ul>
         </div>
-
         <div class="panel">
-          <h3>Mikä auttaisi eniten tätä uhkaa vastaan?</h3>
+          <h2 class="panel-title">Mikä auttaisi eniten tätä uhkaa vastaan</h2>
           <ul id="lessons" class="plain-list"></ul>
         </div>
       </div>
 
       <div class="panel">
-        <h3>Yrityksesi riski kokonaisuutena</h3>
+        <h2 class="panel-title">Yrityksesi riski kokonaisuutena</h2>
         <p class="muted">Yksi hyökkäys on aina osittain tuuria. Tämä kertoo, miten valintasi toimivat keskimäärin.</p>
-        <p class="risk-summary">Odotettu vahinko per hyökkäys: <span id="risk-before" class="muted"></span> → <strong id="risk-after"></strong> <span id="risk-change" class="risk-change"></span></p>
+        <p class="risk-summary">Odotettu vahinko per hyökkäys <span id="risk-before" class="muted"></span> → <strong id="risk-after"></strong> <span id="risk-change" class="risk-change"></span></p>
         <div id="risk-profile" class="risk-profile"></div>
         <p id="required-note" class="required-note" hidden></p>
       </div>
 
       <div class="result-actions">
-        <button id="btn-again" class="btn btn-danger" type="button">Uusi hyökkäys</button>
-        <button id="btn-edit" class="btn btn-primary" type="button">Muokkaa valintoja</button>
         <button id="btn-restart" class="btn btn-ghost" type="button">Vaihda yritystä</button>
+        <button id="btn-edit" class="btn btn-ghost" type="button">Muokkaa valintoja</button>
+        <button id="btn-again" class="btn btn-go" type="button">Uusi hyökkäys</button>
       </div>
     </section>
   </main>
 
-  <footer class="footer muted">
+  <footer class="wrap footer">
     Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
   </footer>
 
-  <script src="js/data.js?v=15"></script>
-  <script src="js/engine.js?v=15"></script>
-  <script src="js/ui.js?v=15"></script>
+  <script src="js/data.js?v=17"></script>
+  <script src="js/engine.js?v=17"></script>
+  <script src="js/ui.js?v=17"></script>
 </body>
 </html>

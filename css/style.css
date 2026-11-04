@@ -1,36 +1,25 @@
+/*
+ * Ilme: iltavuoro toimistolla. Tumma sininen tausta, lämpimästi valaistu
+ * pohjapiirros ja kullanoranssi korostus. Kartta on pääosassa.
+ */
 :root {
-  --bg: #0d1321;
-  --panel: #151d2e;
-  --panel-2: #1c2639;
-  --border: #2a3650;
-  --text: #e6ebf5;
-  --muted: #8f9bb3;
-  --accent: #4f8cff;
-  --accent-soft: rgba(79, 140, 255, 0.15);
-  --danger: #ff5c6c;
+  --bg: #10152a;
+  --surface: #182042;
+  --surface-2: #1f2950;
+  --line: rgba(255, 255, 255, 0.09);
+  --text: #edf0fa;
+  --muted: #9aa3c4;
+  --accent: #ffb547;
+  --accent-ink: #231703;
+  --good: #4ade80;
+  --bad: #ff6b6b;
   --warn: #ffb547;
-  --ok: #3ccf8e;
+  --blue: #6d9bff;
+  --wall: #1b2036;
+  --head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius: 14px;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f3f5fa;
-    --panel: #ffffff;
-    --panel-2: #eef2f9;
-    --border: #d6ddea;
-    --text: #172036;
-    --muted: #5e6b85;
-    --accent: #2f6fe8;
-    --accent-soft: rgba(47, 111, 232, 0.12);
-    --danger: #d93747;
-    --warn: #c47a00;
-    --ok: #13935a;
-    --shadow: 0 6px 18px rgba(23, 32, 54, 0.08);
-    color-scheme: light;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -39,382 +28,194 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 17px/1.5 var(--body);
 }
 
-h1, h2, h3, h4 { margin: 0 0 0.4em; line-height: 1.25; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--head); font-weight: 700; line-height: 1.12; }
 p { margin: 0 0 0.6em; }
-.muted { color: var(--muted); }
 [hidden] { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 0.9rem; }
 
-/* ---------- Ylä- ja alapalkki ---------- */
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
 
-.topbar {
-  padding: 16px max(16px, calc((100% - 1100px) / 2));
-  border-bottom: 1px solid var(--border);
-  background: var(--panel);
-}
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand-icon { font-size: 2rem; }
-.brand h1 { font-size: 1.25rem; margin: 0; }
-.tagline { margin: 0; color: var(--muted); font-size: 0.9rem; }
+/* ---------- Yläpalkki ---------- */
 
-main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
-.footer { text-align: center; padding: 0 16px 32px; font-size: 0.85rem; }
+.topbar { border-bottom: 1px solid var(--line); }
+.topbar-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--head); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.01em; }
+.logo-mark { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); box-shadow: inset -6px -6px 0 rgba(0, 0, 0, 0.18); }
+.logo-sub { color: var(--muted); font-size: 0.95rem; }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
-  margin-bottom: 20px;
-}
-
-.eyebrow {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
-  margin: 0 0 4px;
-}
+main.wrap { padding-top: 36px; padding-bottom: 32px; }
+.footer { color: var(--muted); font-size: 0.85rem; padding-bottom: 28px; }
 
 /* ---------- Painikkeet ---------- */
 
 .btn {
-  font: inherit;
-  font-weight: 600;
-  border: 1px solid transparent;
+  font: 700 1.05rem var(--head);
+  letter-spacing: 0.02em;
   border-radius: 10px;
-  padding: 10px 18px;
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
   cursor: pointer;
-  transition: transform 0.1s, filter 0.15s;
+  transition: transform 0.08s, background 0.15s, box-shadow 0.15s;
 }
-.btn:hover { filter: brightness(1.1); }
+.btn:hover { background: #29356a; }
 .btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-danger { background: var(--danger); color: #fff; }
-.btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-go { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 0 #b7781c; }
+.btn-go:hover { background: #ffc46b; }
+.btn-go:active { box-shadow: 0 1px 0 #b7781c; transform: translateY(3px); }
+.btn-ghost { background: transparent; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 /* ---------- Aloitus ---------- */
 
-.intro h2 { font-size: 1.6rem; }
-.rules { list-style: none; padding: 0; margin: 16px 0 24px; display: grid; gap: 10px; }
-.rules li { display: flex; gap: 10px; align-items: flex-start; }
-.rule-icon { font-size: 1.2rem; }
-
-.difficulty-list {
+.intro-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 40px; align-items: center; }
+.intro-text h1 { font-size: 3.1rem; margin-bottom: 26px; }
+.accent { color: var(--accent); }
+.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 14px; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem 1fr; gap: 12px; color: var(--muted); }
+.steps li strong { color: var(--text); }
+.steps li::before {
+  content: counter(step);
+  font: 700 1.1rem var(--head);
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 8px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--accent);
 }
+.intro-map { transform: perspective(1400px) rotateX(14deg) rotateZ(-2deg); }
+
+.section-h { font-size: 1.6rem; margin: 52px 0 18px; }
+
+.companies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .difficulty {
   font: inherit;
   color: inherit;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 18px;
+  gap: 6px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--panel-2);
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
 }
-.difficulty:hover { border-color: var(--accent); transform: translateY(-2px); }
-.difficulty-icon { font-size: 2rem; }
-.difficulty strong { font-size: 1.15rem; }
-.difficulty-budget { color: var(--accent); font-weight: 600; margin-top: 6px; }
-.difficulty-desc { font-size: 0.9rem; margin: 4px 0; }
-.difficulty-row { font-size: 0.82rem; color: var(--muted); }
+.difficulty:hover { border-color: var(--accent); transform: translateY(-3px); background: var(--surface-2); }
+.difficulty-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+.difficulty strong { font-family: var(--head); font-size: 1.55rem; line-height: 1.1; }
+.difficulty .muted.small { margin-top: -2px; }
+.difficulty-desc { font-size: 0.95rem; margin: 6px 0; }
+.difficulty-row { font-size: 0.88rem; color: var(--muted); padding-top: 6px; border-top: 1px solid var(--line); }
+.difficulty-budget { margin-top: auto; padding-top: 12px; font: 700 1.2rem var(--head); color: var(--accent); }
 
-/* ---------- Tilapalkki ---------- */
+/* ---------- Pelipalkki ---------- */
 
-.status-bar {
+.hud {
   position: sticky;
-  top: 8px;
-  z-index: 5;
+  top: 10px;
+  z-index: 10;
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 20px;
+  grid-template-columns: auto 1fr 1fr auto;
+  gap: 28px;
   align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: rgba(24, 32, 66, 0.94);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
-.status-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-.status-value { font-size: 0.9rem; margin-top: 6px; }
-.status-value span:first-child { font-weight: 700; }
+.hud-label { display: block; font-size: 0.8rem; color: var(--muted); }
+.hud-org strong { font-family: var(--head); font-size: 1.3rem; }
+.hud-value { display: block; font: 700 1.35rem var(--head); margin-bottom: 4px; }
+.hud-value small { font: 400 0.9rem var(--body); color: var(--muted); }
 
-.meter { height: 10px; background: var(--panel-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
-.meter-fill { height: 100%; width: 0; background: var(--accent); transition: width 0.3s, background 0.3s; }
-.meter-fill.friction { background: var(--ok); }
-.meter-fill.friction.over { background: var(--warn); }
+.meter { height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 99px; overflow: hidden; }
+.meter-fill { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
+.meter-fill.friction { background: var(--good); }
+.meter-fill.friction.over { background: var(--bad); }
+.meter-fill.damage { background: var(--bad); }
 
-.section-title { margin-top: 8px; }
-.section-sub { margin-bottom: 16px; }
+/* ---------- Rakennusnäkymä ---------- */
 
-/* ---------- Kontrollikortit ---------- */
+.build-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 22px; align-items: start; }
+.build-layout .stage { position: sticky; top: 112px; }
+.stage-hint { color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
 
-.control-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
-}
-.control-card {
+.shop { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.shop-title { font-size: 1.3rem; margin: 2px 4px 12px; }
+.shop-list { display: grid; gap: 8px; }
+
+.tile {
   font: inherit;
   color: inherit;
   text-align: left;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  background: var(--panel);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, opacity 0.15s, transform 0.15s;
-  position: relative;
+  transition: border-color 0.15s, background 0.15s;
 }
-.control-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-.control-card h3 { font-size: 1rem; }
-.control-card p { font-size: 0.88rem; flex: 1; }
-.control-card.selected { border-color: var(--accent); background: var(--accent-soft); }
-.control-card.selected::after {
-  content: "✓";
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+.tile:hover { border-color: rgba(255, 255, 255, 0.22); }
+.tile.selected { border-color: var(--accent); background: #2b2f4a; box-shadow: inset 4px 0 0 var(--accent); }
+.tile.unaffordable { opacity: 0.4; cursor: not-allowed; }
+.tile.owned { cursor: default; background: transparent; border: 1px dashed var(--line); }
+
+.tile-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-size: 22px;
+  background: color-mix(in srgb, var(--cat) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cat) 45%, transparent);
 }
-.control-card.unaffordable { opacity: 0.4; cursor: not-allowed; }
-.control-card.unaffordable:hover { transform: none; border-color: var(--border); }
+.cat-Estää { --cat: var(--blue); }
+.cat-Havaitsee { --cat: var(--accent); }
+.cat-Toipuu { --cat: var(--good); }
 
-.control-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-right: 30px; }
-.control-icon { font-size: 1.6rem; }
-.control-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 8px; }
-.cost { font-weight: 700; font-size: 1rem; }
-.friction-dots { color: var(--muted); }
-
-.tag {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 2px 8px;
-  border-radius: 99px;
-  background: var(--panel-2);
-  color: var(--muted);
-}
-.tag-Estää { color: var(--accent); }
-.tag-Havaitsee { color: var(--warn); }
-.tag-Toipuu { color: var(--ok); }
-
-.control-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-.control-badges:empty { display: none; }
-.badge { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; border: 1px solid; }
-.badge-owned { color: var(--ok); border-color: var(--ok); }
-.badge-required { color: var(--warn); border-color: var(--warn); }
-.control-card.owned { cursor: default; border-style: dashed; background: var(--panel-2); }
-.control-card.owned:hover { transform: none; border-color: var(--border); }
-
-/* ---------- Hyökkäys ---------- */
-
-.attack-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
-.attack-icon { font-size: 3rem; line-height: 1; }
-
-.timeline { list-style: none; padding: 0; margin: 0; position: relative; }
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 11px;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  background: var(--border);
-}
-.timeline-item {
-  position: relative;
-  display: flex;
-  gap: 16px;
-  padding: 0 0 18px;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.4s, transform 0.4s;
-}
-.timeline-item.visible { opacity: 1; transform: none; }
-.timeline-dot {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--panel-2);
-  border: 3px solid var(--border);
-  z-index: 1;
-}
-.timeline-item.passed .timeline-dot { border-color: var(--danger); background: var(--danger); }
-.timeline-item.blocked .timeline-dot { border-color: var(--ok); background: var(--ok); }
-.timeline-item.skipped { color: var(--muted); }
-.timeline-item.contained .timeline-dot { border-color: var(--warn); background: var(--warn); }
-.timeline-item.contained .timeline-body { border-left-color: var(--warn); }
-.timeline-item.gaveup .timeline-dot { border-color: var(--muted); background: var(--muted); }
-.timeline-item.gaveup .timeline-body { border-left-color: var(--muted); }
-.timeline-body {
-  flex: 1;
-  background: var(--panel-2);
-  border-radius: 10px;
-  padding: 12px 14px;
-  border-left: 4px solid var(--border);
-}
-.timeline-item.passed .timeline-body { border-left-color: var(--danger); }
-.timeline-item.blocked .timeline-body { border-left-color: var(--ok); }
-.timeline-body h4 { font-size: 1rem; }
-.timeline-body p { margin-bottom: 4px; font-size: 0.9rem; }
-.timeline-detail { font-size: 0.85rem !important; }
-.timeline-outcome { font-weight: 700; margin: 6px 0 0 !important; }
-
-.attack-actions, .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
-
-/* ---------- Tulokset ---------- */
-
-.result-hero {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 20px;
-  align-items: center;
-  border-width: 2px;
-}
-.result-hero h2 { font-size: 1.8rem; }
-.grade-blocked, .grade-minor, .grade-lucky { border-color: var(--ok); }
-.grade-moderate { border-color: var(--warn); }
-.grade-moderate h2 { color: var(--warn); }
-.grade-major { border-color: var(--warn); }
-.grade-critical { border-color: var(--danger); }
-.grade-blocked h2, .grade-minor h2, .grade-lucky h2 { color: var(--ok); }
-.grade-major h2 { color: var(--warn); }
-.grade-critical h2 { color: var(--danger); }
-
-.score { text-align: center; }
-
-.discuss { border-left: 4px solid var(--accent); }
-.discuss-question { font-size: 1.15rem; font-weight: 600; margin: 0; }
-.risk-summary { font-size: 1.05rem; }
-.risk-summary strong { color: var(--accent); font-size: 1.3rem; }
-.risk-change { color: var(--ok); font-weight: 700; }
-.required-note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--warn); color: var(--warn); font-weight: 600; }
-
-.grade-scale { grid-column: 1 / -1; padding: 4px 0 18px; }
-.grade-track { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-.grade-seg { height: 10px; border-radius: 3px; position: relative; opacity: 0.45; }
-.grade-seg.active { opacity: 1; }
-.grade-seg span {
-  position: absolute;
-  top: 14px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--muted);
-  white-space: nowrap;
+.tile-top { display: flex; align-items: baseline; gap: 6px; }
+.tile-name { font-weight: 700; font-size: 0.98rem; line-height: 1.25; }
+.tile-law { font-weight: 700; color: var(--accent); font-size: 0.9rem; }
+.tile-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin-top: 2px;
 }
-.grade-seg.active span { color: var(--text); font-weight: 700; }
-.grade-seg-minor { background: var(--ok); }
-.grade-seg-moderate { background: color-mix(in srgb, var(--ok), var(--warn)); }
-.grade-seg-major { background: var(--warn); }
-.grade-seg-critical { background: var(--danger); }
-.grade-marker {
-  position: absolute;
-  top: -5px;
-  width: 4px;
-  height: 20px;
-  margin-left: -2px;
-  border-radius: 2px;
-  background: var(--text);
-  box-shadow: 0 0 0 2px var(--panel);
-}
-.score-value { font-size: 2.6rem; font-weight: 800; line-height: 1; }
-.score-label { font-size: 0.8rem; color: var(--muted); }
+.tile-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; white-space: nowrap; }
+.tile-price { font: 700 1.1rem var(--head); }
+.tile.owned .tile-price { font: 600 0.8rem var(--body); color: var(--good); }
+.tile-pips { font-size: 0.6rem; letter-spacing: 2px; color: var(--muted); }
 
-.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.result-grid .panel { margin-bottom: 20px; }
+/* ---------- Toimiston kartta ---------- */
 
-.damage-bar { height: 14px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin: 10px 0; border: 1px solid var(--border); }
-.damage-fill { height: 100%; background: var(--danger); width: 0; transition: width 0.8s; }
-
-.plain-list { padding-left: 18px; margin: 0; display: grid; gap: 8px; }
-.plain-list .warn { color: var(--warn); }
-.hint { color: var(--muted); }
-.hint.ok { color: var(--ok); }
-
-.risk-prob { display: block; font-size: 0.75rem; color: var(--muted); }
-
-/* Hyökkääjätasot */
-.tier-basic { --tier: var(--ok); }
-.tier-advanced { --tier: var(--warn); }
-.tier-apt { --tier: var(--danger); }
-.tier-badge {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 99px;
-  border: 1px solid var(--tier, var(--border));
-  color: var(--tier, var(--text));
-}
-.small { font-size: 0.85rem; }
-
-.risk-profile { display: grid; gap: 8px; }
-.risk-row {
-  display: grid;
-  grid-template-columns: 240px 1fr 90px;
-  gap: 12px;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-.risk-row.current { background: var(--accent-soft); }
-.risk-label { font-size: 0.9rem; }
-.risk-bar { height: 10px; background: var(--panel-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
-.risk-fill { height: 100%; }
-.risk-fill.low { background: var(--ok); }
-.risk-fill.mid { background: var(--warn); }
-.risk-fill.high { background: var(--danger); }
-.risk-value { font-size: 0.85rem; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
-
-
-/* ---------- Mobiili ---------- */
-
-@media (max-width: 760px) {
-  .status-bar { grid-template-columns: 1fr; gap: 12px; top: 0; }
-  .status-actions .btn, .result-actions .btn, .attack-actions .btn { width: 100%; }
-  .result-hero { grid-template-columns: 1fr; text-align: center; }
-  .result-grid { grid-template-columns: 1fr; gap: 0; }
-  .risk-row { grid-template-columns: 1fr; gap: 4px; }
-  .risk-value { text-align: left; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
-}
-
-/* ---------- Toimiston kartta (pohjapiirros ylhäältä) ---------- */
-
-.map-scroll { margin: 8px 0 28px; border-radius: 16px; }
 .map {
-  --wall: #3a352e;
   position: relative;
   aspect-ratio: 16 / 10;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  background: #cfc8b8;
-  box-shadow: var(--shadow);
+  background: var(--wall);
+  border: 6px solid var(--wall);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .room {
@@ -424,6 +225,14 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   box-shadow: inset 0 0 0 3px var(--wall);
   transition: box-shadow 0.2s;
 }
+/* Kattovalo: lämmin valokeila huoneen keskellä */
+.room:not(.outside)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, rgba(255, 230, 170, 0.28), transparent 70%);
+  pointer-events: none;
+}
 .room::after { content: ""; position: absolute; inset: 0; background: transparent; transition: background-color 0.35s; pointer-events: none; }
 .room.outside { box-shadow: none; }
 
@@ -431,112 +240,253 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   position: relative;
   z-index: 1;
   display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font: 700 0.78rem var(--body);
   padding: 1px 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  background: rgba(16, 21, 42, 0.78);
+  color: #f3f5fc;
 }
 .name-short { display: none; }
-.room-props { position: absolute; z-index: 1; left: 8px; right: 8px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.room-props { position: absolute; z-index: 1; left: 8px; right: 8px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
 .prop {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
-  font-size: 17px;
-  background: #fff;
+  font-size: 18px;
+  background: #fffaf0;
   border: 2px solid var(--wall);
   border-radius: 50%;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
 }
-.prop.owned { background: #e3efe5; border-style: dashed; }
+.prop.owned { background: #dff3e6; }
 .prop.new { animation: pop 0.35s ease-out; }
 @keyframes pop { from { transform: scale(0.2); } 70% { transform: scale(1.2); } to { transform: scale(1); } }
 
 /* Lattiat */
-.room-aula { background-color: #ebe6dc; background-image: conic-gradient(#ddd5c6 25%, transparent 0 50%, #ddd5c6 0 75%, transparent 0); background-size: 26px 26px; }
-.room-posti { background-color: #d8b88a; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 24px); }
-.room-kauppa { background-color: #f1e3c6; background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 18px); }
-.room-vpn { background-color: #c8c7c1; background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1.5px); background-size: 10px 10px; }
-.room-konttori { background-color: #b8c6d4; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
-.room-talous { background-color: #c89a69; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 30px); }
-.room-ittuki { background-color: #c3d0bd; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
-.room-palvelin { background-color: #98a1ab; background-image: linear-gradient(rgba(0, 0, 0, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.14) 1px, transparent 1px); background-size: 22px 22px; }
-.room-valvomo { background-color: #34425a; color: #e8eef8; }
-.room-valvomo .room-name { background: rgba(0, 0, 0, 0.35); color: #e8eef8; }
-.room-kriisi { background-color: #d9c4a5; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 26px); }
-.room-internet { background-color: #20242b; background-image: radial-gradient(rgba(120, 200, 255, 0.25) 1px, transparent 1.5px); background-size: 14px 14px; }
-.room-internet .room-name { background: rgba(0, 0, 0, 0.5); color: #cfe8ff; }
-.room-pilvi { background-color: #a9d5f5; background-image: radial-gradient(circle at 30% 60%, #fff 0 18%, transparent 19%), radial-gradient(circle at 55% 50%, #fff 0 22%, transparent 23%), radial-gradient(circle at 75% 62%, #fff 0 16%, transparent 17%); }
-.room-kaupunki { background-color: #8c9095; background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 8px, transparent 8px 18px); background-size: 100% 14px; background-repeat: no-repeat; background-position: 0 60%; }
+.room-aula { background-color: #e7e1d5; background-image: conic-gradient(#d8cfbf 25%, transparent 0 50%, #d8cfbf 0 75%, transparent 0); background-size: 26px 26px; }
+.room-posti { background-color: #d4b283; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 24px); }
+.room-kauppa { background-color: #eedfc0; background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 18px); }
+.room-vpn { background-color: #c4c3bd; background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1.5px); background-size: 10px 10px; }
+.room-konttori { background-color: #b3c2d2; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
+.room-talous { background-color: #c39465; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 30px); }
+.room-ittuki { background-color: #bfcdb8; background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.5px); background-size: 6px 6px; }
+.room-palvelin { background-color: #949eaa; background-image: linear-gradient(rgba(0, 0, 0, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.14) 1px, transparent 1px); background-size: 22px 22px; }
+.room-valvomo { background-color: #2f3d58; background-image: repeating-linear-gradient(0deg, rgba(120, 190, 255, 0.08) 0 2px, transparent 2px 12px); }
+.room-kriisi { background-color: #d6c0a0; background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 26px); }
+.room-internet { background-color: #0b1020; background-image: radial-gradient(rgba(120, 190, 255, 0.35) 1px, transparent 1.6px); background-size: 14px 14px; }
+.room-pilvi { background-color: #2a3b6e; background-image: radial-gradient(circle at 30% 62%, #c9d6f5 0 17%, transparent 18%), radial-gradient(circle at 55% 52%, #dbe4fb 0 21%, transparent 22%), radial-gradient(circle at 76% 64%, #c9d6f5 0 15%, transparent 16%); }
+.room-kaupunki { background-color: #343a46; background-image: repeating-linear-gradient(90deg, rgba(255, 210, 120, 0.7) 0 8px, transparent 8px 18px); background-size: 100% 12px; background-repeat: no-repeat; background-position: 0 62%; }
 
-/* Korostus, kun korttia osoitetaan */
+/* Korostus, kun suojausta osoitetaan */
 .room.hl { box-shadow: inset 0 0 0 3px var(--wall), inset 0 0 0 7px var(--accent); }
 .room.outside.hl { box-shadow: inset 0 0 0 4px var(--accent); }
 
 /* Hyökkäyksen välähdykset */
-.room.flash-ok::after { background: rgba(46, 160, 90, 0.38); }
-.room.flash-bad::after { background: rgba(220, 50, 50, 0.38); }
-.room.flash-warn::after { background: rgba(240, 170, 40, 0.4); }
-.room.flash-gave::after { background: rgba(120, 120, 120, 0.35); }
+.room.flash-ok::after { background: rgba(74, 222, 128, 0.38); }
+.room.flash-bad::after { background: rgba(255, 90, 90, 0.42); }
+.room.flash-warn::after { background: rgba(255, 181, 71, 0.42); }
+.room.flash-gave::after { background: rgba(140, 140, 160, 0.38); }
 
 .attacker-token {
   position: absolute;
   z-index: 5;
-  font-size: 32px;
+  font-size: 34px;
   line-height: 1;
   transform: translate(-50%, -50%);
   transition: left 0.6s ease-in-out, top 0.6s ease-in-out;
-  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
 }
-.attacker-token.stopped { filter: grayscale(1) drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45)); }
+.attacker-token.stopped { filter: grayscale(1) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)); }
+.attacker-token.idle { animation: lurk 2.4s ease-in-out infinite; }
+@keyframes lurk { 50% { transform: translate(-50%, -62%); } }
 .bubble {
   position: absolute;
-  bottom: 110%;
+  bottom: 112%;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 12px;
-  font-weight: 700;
+  font: 700 12px var(--body);
   padding: 3px 9px;
   border-radius: 8px;
-  border: 2px solid #222;
   background: #fff;
-  color: #222;
+  color: #1b1b1b;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   opacity: 0;
   transition: opacity 0.2s;
 }
 .bubble.show { opacity: 1; }
-.bubble-ok { background: #d6f5df; }
-.bubble-bad { background: #ffd9d6; }
-.bubble-warn { background: #ffecc2; }
-.bubble-gave { background: #e6e6e6; }
+.bubble-ok { background: #c9f7d8; }
+.bubble-bad { background: #ffd2d2; }
+.bubble-warn { background: #ffe6b8; }
+.bubble-gave { background: #e4e4ea; }
 
-/* Hyökkäysnäkymä: kartta ja tapahtumat rinnakkain */
-.attack-stage { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; align-items: start; }
-.attack-stage .map-scroll { margin: 0; position: sticky; top: 12px; }
-.attack-stage .timeline { max-height: none; }
+/* ---------- Hyökkäys ---------- */
 
-/* Rakennusnäkymä: kartta pysyy näkyvissä korttien vieressä */
-.build-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 22px; align-items: start; }
-.build-layout .map-scroll { position: sticky; top: 140px; margin: 0; }
-.build-layout .control-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.attack-head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 22px; }
+.attack-icon { font-size: 3rem; line-height: 1; }
+.attack-head h1 { font-size: 2.4rem; margin-bottom: 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; max-width: 70ch; }
 
-@media (max-width: 1000px) {
-  .attack-stage, .build-layout { grid-template-columns: 1fr; }
-  .attack-stage .map-scroll { position: static; }
-  .build-layout .map-scroll { position: static; margin-bottom: 16px; }
+.tier-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 3px 12px;
+  border-radius: 99px;
+  border: 1px solid currentColor;
+}
+.tier-basic { color: var(--good); }
+.tier-advanced { color: var(--accent); }
+.tier-apt { color: var(--bad); }
+
+.attack-stage { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; }
+.attack-stage .stage { position: sticky; top: 16px; }
+
+.log { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.log-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+
+.timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.timeline-item {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.timeline-item.visible { opacity: 1; transform: none; }
+.timeline-dot { width: 12px; height: 12px; margin-top: 5px; border-radius: 50%; background: var(--muted); }
+.timeline-item.blocked .timeline-dot { background: var(--good); }
+.timeline-item.passed .timeline-dot { background: var(--bad); }
+.timeline-item.contained .timeline-dot { background: var(--warn); }
+.timeline-item.skipped { background: transparent; }
+.timeline-body h4 { font-size: 1.05rem; }
+.timeline-body p { margin: 2px 0 0; font-size: 0.9rem; }
+.timeline-detail { color: var(--text); }
+.timeline-outcome { font-weight: 700; }
+.timeline-item.blocked .timeline-outcome { color: var(--good); }
+.timeline-item.passed .timeline-outcome { color: var(--bad); }
+.timeline-item.contained .timeline-outcome { color: var(--warn); }
+
+/* ---------- Tulokset ---------- */
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; }
+.panel-title { font-size: 1.3rem; margin-bottom: 10px; }
+.kicker { color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+
+.result-hero { display: grid; grid-template-columns: 1fr auto; gap: 8px 28px; border-top: 4px solid var(--muted); }
+.result-hero h1 { font-size: 2.6rem; margin-bottom: 8px; }
+.grade-blocked, .grade-minor, .grade-lucky { border-top-color: var(--good); }
+.grade-moderate, .grade-major { border-top-color: var(--warn); }
+.grade-critical { border-top-color: var(--bad); }
+.grade-blocked h1, .grade-minor h1, .grade-lucky h1 { color: var(--good); }
+.grade-moderate h1, .grade-major h1 { color: var(--warn); }
+.grade-critical h1 { color: var(--bad); }
+
+.score { text-align: right; font-family: var(--head); line-height: 1; }
+.score-value { font-size: 4.2rem; font-weight: 700; }
+.score-label { display: block; color: var(--muted); font-size: 1.1rem; }
+
+.grade-scale { grid-column: 1 / -1; padding: 8px 0 20px; }
+.grade-track { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.grade-seg { height: 8px; position: relative; border-radius: 99px; background: rgba(255, 255, 255, 0.08); }
+.grade-seg-minor.active { background: var(--good); }
+.grade-seg-moderate.active, .grade-seg-major.active { background: var(--warn); }
+.grade-seg-critical.active { background: var(--bad); }
+.grade-seg span { position: absolute; top: 12px; left: 0; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.grade-seg.active span { color: var(--text); font-weight: 700; }
+.grade-marker { position: absolute; top: -5px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text); }
+
+.discuss { border-left: 4px solid var(--accent); }
+.discuss-label { display: block; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.discuss-question { font: 700 1.5rem/1.25 var(--head); margin: 0; }
+
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.damage-line strong { font: 700 1.9rem var(--head); }
+.damage-line { margin-bottom: 8px; }
+
+.plain-list { list-style: none; padding: 0; margin: 12px 0 0; }
+.plain-list li { padding: 8px 0; border-top: 1px solid var(--line); }
+.plain-list .warn { color: var(--bad); font-weight: 600; }
+.hint { color: var(--muted); }
+.hint.ok { color: var(--good); }
+
+.risk-summary { font-size: 1.05rem; margin: 10px 0 14px; }
+.risk-summary strong { font: 700 1.5rem var(--head); color: var(--accent); }
+.risk-change { color: var(--good); font-weight: 700; }
+
+.risk-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px 5.5rem;
+  gap: 16px;
+  align-items: center;
+  padding: 9px 10px;
+  border-top: 1px solid var(--line);
+}
+.risk-row.current { background: var(--surface-2); border-radius: 8px; }
+.risk-prob { display: block; font-size: 0.8rem; color: var(--muted); }
+.risk-bar { height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 99px; overflow: hidden; }
+.risk-fill { height: 100%; border-radius: 99px; }
+.risk-fill.low { background: var(--good); }
+.risk-fill.mid { background: var(--warn); }
+.risk-fill.high { background: var(--bad); }
+.risk-value { font-size: 0.88rem; color: var(--muted); text-align: right; white-space: nowrap; }
+
+.required-note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; background: rgba(255, 181, 71, 0.12); color: var(--accent); font-weight: 600; }
+
+.result-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
+
+/* ---------- Pienemmät näytöt ---------- */
+
+@media (max-width: 1100px) {
+  .build-layout, .attack-stage { grid-template-columns: 1fr; }
+  .build-layout .stage, .attack-stage .stage { position: static; }
+  .hud { grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  .hud-org { grid-column: 1 / -1; }
+  .hud .btn { grid-column: 1 / -1; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .wrap { padding: 0 14px; }
+  main.wrap { padding-top: 20px; }
+  .intro-hero { grid-template-columns: 1fr; gap: 24px; }
+  .intro-text h1 { font-size: 2.2rem; }
+  .intro-map { transform: none; }
+  .companies, .result-grid { grid-template-columns: 1fr; }
+  .hud { top: 6px; padding: 10px 12px; }
+  .hud-org { display: none; }
+  .hud-value { font-size: 1.15rem; }
+  #friction-note { display: none; }
+  .attack-stage .stage { position: sticky; top: 6px; z-index: 6; }
+  .attack-head h1 { font-size: 1.8rem; }
+  .attack-icon { font-size: 2.2rem; }
+  .result-hero { grid-template-columns: 1fr; }
+  .result-hero h1 { font-size: 2rem; }
+  .score { text-align: left; }
+  .score-value { font-size: 3.2rem; }
+  .score-label { display: inline; }
+  .grade-seg span { font-size: 0.68rem; }
+  .discuss-question { font-size: 1.25rem; }
+  .risk-row { grid-template-columns: 1fr auto; }
+  .risk-bar { grid-column: 1 / -1; grid-row: 2; }
+  .result-actions .btn, .log-actions .btn { flex: 1 1 100%; }
+
+  .map { border-width: 4px; border-radius: 12px; }
   .room { padding: 4px; }
-  .room-name { font-size: 0.58rem; padding: 0 4px; }
+  .room-name { font-size: 0.56rem; padding: 0 4px; }
   .name-full { display: none; }
   .name-short { display: inline; }
-  .attack-stage .map-scroll { position: sticky; top: 6px; z-index: 6; }
   .room-props { left: 4px; right: 4px; bottom: 4px; gap: 2px; }
   .prop { width: 20px; height: 20px; font-size: 11px; border-width: 1.5px; }
   .attacker-token { font-size: 22px; }
   .bubble { font-size: 10px; padding: 1px 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }

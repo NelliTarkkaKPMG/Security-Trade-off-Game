@@ -21,6 +21,7 @@
   const pct = (p) => Math.round(p * 100) + " %";
   const names = (ids) => ids.map((id) => controlMap[id].short).join(", ");
   const pips = (n) => "●".repeat(n) + "○".repeat(3 - n);
+  const TILTS = [-1.2, 0.8, -0.4, 1.1, -0.9, 0.5];
 
   function el(tag, cls, text) {
     const node = document.createElement(tag);
@@ -92,36 +93,36 @@
     const d = state.difficulty;
     // Jo omistetut kontrollit näytetään ensin.
     const ordered = [...data.controls].sort((a, b) => d.owned.includes(b.id) - d.owned.includes(a.id));
-    for (const c of ordered) {
+    ordered.forEach((c, i) => {
       const isOwned = d.owned.includes(c.id);
-      const row = el("button", "control-row" + (isOwned ? " owned" : ""));
-      row.type = "button";
-      row.dataset.id = c.id;
-      if (isOwned) row.disabled = true;
+      const card = el("button", "card cat-" + c.category + (isOwned ? " owned" : ""));
+      card.type = "button";
+      card.dataset.id = c.id;
+      // Pieni vino kuin pöydälle heitetyillä korteilla.
+      card.style.setProperty("--tilt", TILTS[i % TILTS.length] + "deg");
+      if (isOwned) card.disabled = true;
 
-      const name = el("div", "control-name", c.name);
-      if (d.required.includes(c.id)) {
-        const law = el("span", "law-mark", "§");
-        law.title = d.regulation + " edellyttää tätä";
-        name.append(law);
-      }
-      name.append(el("span", "pips inline", pips(c.friction)));
-      const text = el("div");
-      text.append(name, el("div", "control-desc", c.desc));
+      const cost = el("span", "card-cost");
+      cost.append(el("strong", null, isOwned ? "✓" : String(c.cost)), el("small", null, isOwned ? "" : "k€"));
 
-      const friction = el("span", "pips", pips(c.friction));
+      const art = el("div", "card-art");
+      art.append(el("span", "card-short" + (c.short.length > 12 ? " long" : ""), c.short));
+
+      const foot = el("div", "card-foot");
+      const friction = el("span", "card-friction", "Hankaluus " + pips(c.friction));
       friction.title = "Hankaloittaa työtä: " + c.friction + "/3";
+      foot.append(friction);
+      if (d.required.includes(c.id)) {
+        const law = el("span", "card-law", "§ Laki");
+        law.title = d.regulation + " edellyttää tätä";
+        foot.append(law);
+      }
 
-      row.append(
-        el("span", "box", isOwned ? "✓" : ""),
-        text,
-        el("span", "control-cat", c.category),
-        friction,
-        el("span", "control-price", isOwned ? "Käytössä" : money(c.cost))
-      );
-      if (!isOwned) row.addEventListener("click", () => toggleControl(c.id));
-      grid.append(row);
-    }
+      card.append(cost, el("span", "card-type", c.category), art, el("h3", "card-name", c.name), el("p", "card-text", c.desc), foot);
+      if (isOwned) card.append(el("span", "stamp stamp-owned", "Jo käytössä"));
+      else card.addEventListener("click", () => toggleControl(c.id));
+      grid.append(card);
+    });
     updateBuild();
   }
 
@@ -151,13 +152,12 @@
     $("friction-value").textContent = friction + " / " + data.frictionLimit;
     $("friction-note").textContent = mult < 1 ? "liikaa – ihmiset alkavat kiertää suojauksia" : "";
 
-    for (const row of document.querySelectorAll(".control-row:not(.owned)")) {
-      const c = controlMap[row.dataset.id];
+    for (const card of document.querySelectorAll(".card:not(.owned)")) {
+      const c = controlMap[card.dataset.id];
       const selected = state.selected.has(c.id);
-      row.classList.toggle("selected", selected);
-      row.classList.toggle("unaffordable", !selected && c.cost > left);
-      row.setAttribute("aria-pressed", String(selected));
-      row.querySelector(".box").textContent = selected ? "✓" : "";
+      card.classList.toggle("selected", selected);
+      card.classList.toggle("unaffordable", !selected && c.cost > left);
+      card.setAttribute("aria-pressed", String(selected));
     }
   }
 
@@ -209,18 +209,18 @@
           ? "Suojaukset eivät pysäyttäneet, mutta rajasivat vahinkoa."
           : null;
       const [cls, status] = st.blocked
-        ? ["blocked", "PYSÄYTETTY"]
+        ? ["blocked", "Pysäytetty"]
         : st.gaveUp
-          ? ["gaveup", "LUOVUTTI"]
+          ? ["gaveup", "Luovutti"]
           : contained
-            ? ["contained", "RAJATTU"]
-            : ["passed", "LÄPI"];
+            ? ["contained", "Rajattu"]
+            : ["passed", "Läpi"];
       return timelineItem(cls, status, i + 1 + ". " + st.name, st.text, defenceText(st.contributors, st.p, "Suojana"), outcome);
     });
 
     // Vaiheet, joihin hyökkäys ei koskaan edennyt
     for (let i = r.stages.length; i < r.scenario.stages.length; i++) {
-      items.push(timelineItem("skipped", "—", i + 1 + ". " + r.scenario.stages[i].name, "Hyökkäys ei edennyt tänne.", null, null));
+      items.push(timelineItem("skipped", "Ei edennyt", i + 1 + ". " + r.scenario.stages[i].name, "Hyökkäys ei edennyt tänne.", null, null));
     }
 
     if (r.breached) {
@@ -228,7 +228,7 @@
       items.push(
         timelineItem(
           d.detected ? "blocked" : "passed",
-          d.detected ? "AJOISSA" : "MYÖHÄSSÄ",
+          d.detected ? "Ajoissa" : "Myöhässä",
           "Havaitseminen",
           d.text,
           defenceText(d.contributors, d.p, "Havaitsijana", "Kukaan ei ollut valvomassa."),
@@ -239,7 +239,7 @@
       items.push(
         timelineItem(
           rc.contributors.length ? "blocked" : "passed",
-          rc.contributors.length ? "−" + pct(1 - rc.factor) : "EI APUA",
+          rc.contributors.length ? "−" + pct(1 - rc.factor) : "Ei apua",
           "Toipuminen",
           null,
           rc.contributors.length

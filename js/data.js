@@ -21,7 +21,7 @@
   const controls = [
     {
       id: "mfa",
-      name: "Monivaiheinen tunnistautuminen (MFA)",
+      name: "Monivaiheinen tunnistau\u00ADtuminen (MFA)",
       short: "MFA",
       cost: 15,
       friction: 1,
@@ -31,7 +31,7 @@
     {
       id: "email",
       name: "Sähköpostin suodatus",
-      short: "Sähköpostisuodatus",
+      short: "Sähköposti\u00ADsuodatus",
       cost: 10,
       friction: 0,
       category: "Estää",
@@ -48,7 +48,7 @@
     },
     {
       id: "verify",
-      name: "Varmistuskäytännöt",
+      name: "Varmistus\u00ADkäytännöt",
       short: "Varmistukset",
       cost: 8,
       friction: 1,
@@ -57,7 +57,7 @@
     },
     {
       id: "edr",
-      name: "Laitteiden suojausohjelmisto (EDR)",
+      name: "Laitteiden suojaus\u00ADohjelmisto (EDR)",
       short: "EDR",
       cost: 25,
       friction: 0,
@@ -102,7 +102,7 @@
     },
     {
       id: "siem",
-      name: "Tietoturvavalvonta 24/7",
+      name: "Tietoturva\u00ADvalvonta 24/7",
       short: "Valvonta",
       cost: 30,
       friction: 0,
@@ -111,7 +111,7 @@
     },
     {
       id: "pam",
-      name: "Käyttöoikeuksien rajaus",
+      name: "Käyttö\u00ADoikeuksien rajaus",
       short: "Oikeuksien rajaus",
       cost: 20,
       friction: 2,
@@ -129,7 +129,7 @@
     },
     {
       id: "ddos",
-      name: "Palvelunestosuojaus",
+      name: "Palvelunesto\u00ADsuojaus",
       short: "DDoS-suojaus",
       cost: 18,
       friction: 0,
@@ -138,8 +138,8 @@
     },
     {
       id: "irplan",
-      name: "Häiriötilannesuunnitelma",
-      short: "Häiriösuunnitelma",
+      name: "Häiriötilanne\u00ADsuunnitelma",
+      short: "Häiriö\u00ADsuunnitelma",
       cost: 10,
       friction: 0,
       category: "Toipuu",

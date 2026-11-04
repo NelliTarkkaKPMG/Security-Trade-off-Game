@@ -7,8 +7,8 @@
   <meta name="description" content="Tietoturvan kompromissipeli: valitse suojaukset rajallisella budjetilla ja katso, miten ne kestävät yritykseesi kohdistuvan hyökkäyksen.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Rubik:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
   <header class="masthead">
@@ -38,11 +38,8 @@
         <h1 id="build-title">Valitse suojaukset</h1>
         <p id="org-name" class="muted"></p>
       </div>
-      <div class="legend muted">
-        <span><span class="pips" aria-hidden="true">●○○</span> hankaloittaa työtä</span>
-        <span><span class="law-mark" aria-hidden="true">§</span> laki edellyttää</span>
-      </div>
-      <div id="control-grid" class="control-list"></div>
+      <p class="legend">Napauta korttia ottaaksesi sen käyttöön. <span class="legend-cat cat-Estää">Estää</span> <span class="legend-cat cat-Havaitsee">Havaitsee</span> <span class="legend-cat cat-Toipuu">Toipuu</span></p>
+      <div id="control-grid" class="card-grid"></div>
 
       <div class="status-bar" aria-live="polite">
         <div class="status-item">
@@ -88,7 +85,7 @@
 
       <blockquote class="discuss">
         <p id="discuss"></p>
-        <cite>Keskustelkaa</cite>
+        <cite>Kysymyskortti · keskustelkaa tiimin kanssa</cite>
       </blockquote>
 
       <div class="columns">
@@ -124,8 +121,8 @@
     Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
   </footer>
 
-  <script src="js/data.js?v=10"></script>
-  <script src="js/engine.js?v=10"></script>
-  <script src="js/ui.js?v=10"></script>
+  <script src="js/data.js?v=11"></script>
+  <script src="js/engine.js?v=11"></script>
+  <script src="js/ui.js?v=11"></script>
 </body>
 </html>

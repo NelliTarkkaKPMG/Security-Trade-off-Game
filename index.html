@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
   <header class="topbar">
@@ -25,12 +25,11 @@
         <div class="intro-text">
           <h1 id="intro-title">Olet uusi tietoturvavastaava. <span class="accent">Kaikkeen raha ei riitä.</span></h1>
           <ol class="steps">
-            <li><span><strong>Varusta toimisto.</strong> Jokainen suojaus maksaa, ja osa on yrityksellä jo valmiina.</span></li>
+            <li><span><strong>Valitse suojaukset.</strong> Jokainen suojaus maksaa, ja osa on yrityksellä jo valmiina.</span></li>
             <li><span><strong>Älä kuormita ihmisiä.</strong> Liian monta hankaloittavaa suojausta, ja niitä aletaan kiertää.</span></li>
-            <li><span><strong>Kestä hyökkäys.</strong> Hyökkääjä kulkee toimistosi läpi – katso, mihin se pysähtyy.</span></li>
+            <li><span><strong>Kestä hyökkäys.</strong> Hyökkäys arvotaan sen mukaan, mikä juuri tällaista yritystä oikeasti uhkaa.</span></li>
           </ol>
         </div>
-        <div class="intro-map" aria-hidden="true"><div id="intro-map"></div></div>
       </div>
       <h2 class="section-h">Valitse yritys</h2>
       <div id="difficulty-list" class="companies"></div>
@@ -56,16 +55,9 @@
         <button id="btn-attack" class="btn btn-go" type="button">Käynnistä hyökkäys</button>
       </div>
 
-      <div class="build-layout">
-        <div class="stage">
-          <div id="build-map"></div>
-          <p class="stage-hint">Valitsemasi suojaukset ilmestyvät huoneisiinsa. Osoita suojausta nähdäksesi, minne se kuuluu.</p>
-        </div>
-        <aside class="shop" aria-labelledby="build-title">
-          <h2 id="build-title" class="shop-title">Suojaukset</h2>
-          <div id="control-grid" class="shop-list"></div>
-        </aside>
-      </div>
+      <h2 id="build-title" class="section-h">Valitse suojaukset</h2>
+      <p class="muted">Klikkaa korttia valitaksesi sen. Harmaisiin budjetti ei enää riitä.</p>
+      <div id="control-grid" class="control-grid"></div>
     </section>
 
     <!-- Hyökkäys -->
@@ -79,14 +71,13 @@
         </div>
       </div>
       <div class="attack-stage">
-        <div class="stage"><div id="attack-map"></div></div>
-        <aside class="log">
+        <div class="log">
           <ol id="attack-timeline" class="timeline"></ol>
           <div class="log-actions">
             <button id="btn-skip" class="btn btn-ghost" type="button">Näytä kaikki heti</button>
             <button id="btn-results" class="btn btn-go" type="button" hidden>Näytä tulokset</button>
           </div>
-        </aside>
+        </div>
       </div>
     </section>
 
@@ -143,8 +134,8 @@
     Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
   </footer>
 
-  <script src="js/data.js?v=17"></script>
-  <script src="js/engine.js?v=17"></script>
-  <script src="js/ui.js?v=17"></script>
+  <script src="js/data.js?v=18"></script>
+  <script src="js/engine.js?v=18"></script>
+  <script src="js/ui.js?v=18"></script>
 </body>
 </html>

@@ -308,16 +308,3 @@ test("verification procedures are the key control against social engineering", (
 test("every scenario has a discussion question", () => {
   for (const s of data.scenarios) assert.ok(s.discuss && s.discuss.endsWith("?"), s.id);
 });
-
-test("office map: every control and attack stage is placed in a real room", () => {
-  const rooms = new Set(data.rooms.map((r) => r.id));
-  for (const c of data.controls) {
-    assert.ok(c.rooms.length > 0, c.id);
-    for (const id of c.rooms) assert.ok(rooms.has(id), `${c.id}: ${id}`);
-  }
-  for (const s of data.scenarios) {
-    assert.ok(rooms.has(s.start), `${s.id} start`);
-    for (const st of s.stages) assert.ok(rooms.has(st.room), `${s.id}: ${st.name}`);
-  }
-  for (const r of data.rooms) assert.ok(r.x >= 0 && r.y >= 0 && r.x + r.w <= 100 && r.y + r.h <= 100, r.id);
-});

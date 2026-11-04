@@ -35,6 +35,39 @@
     return node;
   }
 
+  // Kasvattaa palkin nollasta, kun näkymä on piirretty.
+  function animateWidth(elm, width) {
+    elm.style.width = "0%";
+    if (reducedMotion) {
+      elm.style.width = width;
+      return;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => (elm.style.width = width)));
+  }
+
+  // Laskee luvun nollasta tavoitteeseen.
+  function countUp(elm, to) {
+    if (reducedMotion) {
+      elm.textContent = to;
+      return;
+    }
+    const start = performance.now();
+    const step = (t) => {
+      const k = Math.min(1, (t - start) / 900);
+      elm.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    elm.textContent = "0";
+    requestAnimationFrame(step);
+  }
+
+  // Käynnistää CSS-animaation uudelleen samalle elementille.
+  function replay(elm, cls) {
+    elm.classList.remove(cls);
+    void elm.offsetWidth;
+    elm.classList.add(cls);
+  }
+
   function show(screen) {
     for (const s of document.querySelectorAll(".screen")) s.hidden = s.id !== "screen-" + screen;
     window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
@@ -137,7 +170,11 @@
     const friction = engine.totalFriction(active(), data.controls);
     const mult = engine.effectivenessMultiplier(friction, data.frictionLimit);
 
-    $("budget-left").textContent = money(left);
+    const budgetEl = $("budget-left");
+    if (budgetEl.textContent !== money(left)) {
+      budgetEl.textContent = money(left);
+      replay(budgetEl, "bump");
+    }
     $("budget-total").textContent = money(budget);
     $("budget-fill").style.width = Math.min(100, ((budget - left) / budget) * 100) + "%";
 
@@ -241,22 +278,60 @@
     btnResults.hidden = true;
     btnSkip.hidden = false;
 
+    items.forEach((li) => list.append(li));
+
+    // Hyökkäyksen reitti: solmu jokaiselle vaiheelle, pulssi etenee solmusta toiseen.
+    const path = $("attack-path");
+    path.replaceChildren();
+    const track = el("div", "path-track");
+    const fill = el("div", "path-fill");
+    const pulse = el("div", "path-pulse");
+    track.append(fill, pulse);
+    path.append(track);
+    const pos = (i) => (items.length === 1 ? 50 : (i / (items.length - 1)) * 100);
+    const nodes = items.map((li, i) => {
+      const node = el("div", "path-node " + li.className.replace("timeline-item ", ""));
+      node.style.left = pos(i) + "%";
+      const label = li.querySelector("h4").textContent.replace(/^\d+\.\s*/, "");
+      node.append(el("span", "path-dot"), el("span", "path-label", label));
+      track.append(node);
+      return node;
+    });
+
+    const isSkipped = (i) => items[i].classList.contains("skipped");
+    const reveal = (i, animate) => {
+      items[i].classList.add("visible");
+      nodes[i].classList.add("on");
+      if (isSkipped(i)) return; // hyökkääjä ei koskaan päässyt tänne
+      fill.style.width = pos(i) + "%";
+      pulse.style.left = pos(i) + "%";
+      if (animate && items[i].classList.contains("passed")) replay(items[i], "hit");
+      // Pysäytetty: pulssi sammuu ja saavuttamattomat vaiheet näytetään heti.
+      if (items[i].classList.contains("blocked") || items[i].classList.contains("gaveup")) {
+        if (i < r.stages.length) {
+          pulse.classList.add("stopped");
+          items.forEach((_, j) => isSkipped(j) && reveal(j, false));
+        }
+      }
+    };
+
     const finish = () => {
       revealTimers.forEach(clearTimeout);
       revealTimers = [];
-      for (const li of list.children) li.classList.add("visible");
+      items.forEach((_, i) => reveal(i, false));
       btnSkip.hidden = true;
       btnResults.hidden = false;
       btnResults.focus();
     };
 
-    items.forEach((li) => list.append(li));
     if (reducedMotion) {
       finish();
       return;
     }
-    items.forEach((li, i) => revealTimers.push(setTimeout(() => li.classList.add("visible"), 300 + i * 1000)));
-    revealTimers.push(setTimeout(finish, 300 + items.length * 1000));
+    replay($("alarm"), "go");
+    const sequence = items.map((_, i) => i).filter((i) => !isSkipped(i));
+    sequence.forEach((i, n) => revealTimers.push(setTimeout(() => reveal(i, true), 900 + n * 1100)));
+    revealTimers.push(setTimeout(finish, 900 + sequence.length * 1100));
     btnSkip.onclick = finish;
   }
 
@@ -266,7 +341,14 @@
     $("result-hero").className = "panel result-hero grade-" + r.grade.id;
     $("result-scenario").textContent = r.scenario.name + " · " + r.tier.name;
     $("result-title").textContent = r.grade.label;
-    $("result-score").textContent = r.score;
+    countUp($("result-score"), r.score);
+    const gauge = $("gauge-fill");
+    const circumference = 2 * Math.PI * 52;
+    gauge.style.strokeDasharray = circumference;
+    gauge.style.strokeDashoffset = circumference;
+    const target = circumference * (1 - r.score / 100);
+    if (reducedMotion) gauge.style.strokeDashoffset = target;
+    else requestAnimationFrame(() => requestAnimationFrame(() => (gauge.style.strokeDashoffset = target)));
 
     let summary;
     if (r.gaveUp) {
@@ -281,7 +363,7 @@
     $("result-summary").textContent = summary;
     renderGradeScale(r);
 
-    $("damage-fill").style.width = r.ratio * 100 + "%";
+    animateWidth($("damage-fill"), r.ratio * 100 + "%");
     $("damage-value").textContent = money(r.damage);
     $("damage-max").textContent = money(r.impact);
     renderBreakdown(r);
@@ -374,7 +456,7 @@
       label.append(el("span", "risk-prob", pct(row.probability) + " hyökkäyksistä"));
       const bar = el("div", "risk-bar");
       const fill = el("div", "risk-fill");
-      fill.style.width = Math.max(1, row.ratio * 100) + "%";
+      animateWidth(fill, Math.max(1, row.ratio * 100) + "%");
       fill.classList.add(row.ratio < 0.2 ? "low" : row.ratio < 0.5 ? "mid" : "high");
       bar.append(fill);
       item.append(label, bar, el("div", "risk-value", "läpi " + pct(row.breachProbability)));
@@ -398,6 +480,26 @@
   });
   $("btn-restart").addEventListener("click", () => show("intro"));
 
+  // Uhkatutka: jokainen skenaario on piste tutkassa, yleisimmät lähimpänä keskustaa.
+  // Piste välähtää, kun pyörivä säde osuu siihen (viive = kulma / kierros).
+  function renderRadar() {
+    const wrap = $("radar-blips");
+    const sweepSeconds = 6;
+    const max = Math.max(...data.scenarios.map((sc) => sc.likelihood));
+    data.scenarios.forEach((sc, i) => {
+      const angle = (i / data.scenarios.length) * 360 + 12;
+      const radius = 42 - (sc.likelihood / max) * 20;
+      const rad = ((angle - 90) * Math.PI) / 180;
+      const blip = icon("s-" + sc.id, "blip");
+      blip.style.left = 50 + radius * Math.cos(rad) + "%";
+      blip.style.top = 50 + radius * Math.sin(rad) + "%";
+      blip.style.animationDelay = (angle / 360) * sweepSeconds + "s";
+      blip.title = sc.name;
+      wrap.append(blip);
+    });
+  }
+
+  renderRadar();
   renderDifficulties();
   show("intro");
 })();

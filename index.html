@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..800&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=19">
+  <link rel="stylesheet" href="css/style.css?v=23">
 </head>
 <body>
   <header class="topbar">
@@ -29,6 +29,11 @@
             <li><span><strong>Älä kuormita ihmisiä.</strong> Liian monta hankaloittavaa suojausta, ja niitä aletaan kiertää.</span></li>
             <li><span><strong>Kestä hyökkäys.</strong> Hyökkäys arvotaan sen mukaan, mikä juuri tällaista yritystä oikeasti uhkaa.</span></li>
           </ol>
+        </div>
+        <div class="radar" aria-hidden="true">
+          <div class="radar-sweep"></div>
+          <div id="radar-blips"></div>
+          <div class="radar-core"></div>
         </div>
       </div>
       <h2 class="section-h">Valitse yritys</h2>
@@ -70,6 +75,7 @@
           <span id="attack-tier" class="tier-badge"></span>
         </div>
       </div>
+      <div id="attack-path" class="attack-path" aria-hidden="true"></div>
       <div class="attack-stage">
         <div class="log">
           <ol id="attack-timeline" class="timeline"></ol>
@@ -90,8 +96,14 @@
           <p id="result-summary" class="lede"></p>
         </div>
         <div class="score">
-          <span class="score-value" id="result-score"></span>
-          <span class="score-label">/ 100</span>
+          <svg class="gauge" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="gauge-bg" cx="60" cy="60" r="52"/>
+            <circle id="gauge-fill" class="gauge-fill" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="gauge-text">
+            <span class="score-value" id="result-score"></span>
+            <span class="score-label">/ 100</span>
+          </div>
         </div>
         <div id="grade-scale" class="grade-scale" aria-hidden="true"></div>
       </div>
@@ -130,13 +142,15 @@
     </section>
   </main>
 
+  <div id="alarm" class="alarm" aria-hidden="true"></div>
+
   <footer class="wrap footer">
     Opetuspeli. Luvut ovat yksinkertaistettuja arvioita, eivät todellisia riskimittauksia.
   </footer>
 
-  <script src="js/icons.js?v=19"></script>
-  <script src="js/data.js?v=19"></script>
-  <script src="js/engine.js?v=19"></script>
-  <script src="js/ui.js?v=19"></script>
+  <script src="js/icons.js?v=23"></script>
+  <script src="js/data.js?v=23"></script>
+  <script src="js/engine.js?v=23"></script>
+  <script src="js/ui.js?v=23"></script>
 </body>
 </html>
